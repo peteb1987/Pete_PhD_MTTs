@@ -8,17 +8,18 @@ dbstop if error
 DefaultParameters;
 StructTemplates;
 
-% Set random stream
-s = RandStream('mt19937ar', 'seed', Par.rand_seed);
-RandStream.setDefaultStream(s);
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set test-specific parameters                                        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Set random stream
+s = RandStream('mt19937ar', 'seed', Par.rand_seed);
+RandStream.setDefaultStream(s);
 
 % Generate target states
 [TrueTracks, InitStates] = GenerateStates();
@@ -26,27 +27,20 @@ RandStream.setDefaultStream(s);
 % Generate observations from target states
 [Observs, detections] = GenerateObservations(TrueTracks);
 
+% Plot states and observations
+state_fig = PlotTrueTracks(TrueTracks);
+obs_fig = PlotObs(Observs, detections);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Run tracking algorithm                                              %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [ Results ] = Track_MCMC(detections, Observs, InitStates );
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Plot and analyse                                                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+PlotParticles(Results{Par.T}.particles, state_fig);
 
-
-
-
-
-% Plot states and observations
-fig_states = PlotTrueState(TrueState);
-PlotObs(Observs, detections);
-
-% Run tracker
-[ Chains ] = MultiTargetTrack(detections, Observs, {TargSpec(:).state} );
-
-% Plot final estimates
-PlotTracks(Chains{Par.T}, fig);
-
-% Analyse associations
-[ass, count, present] = AnalyseAss( detections, Chains{Par.T}, Par.T);
+[ assoc ] = RetrieveAssocs( Par.T, Results{Par.T}.particles );

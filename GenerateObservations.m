@@ -52,7 +52,7 @@ for t = 1:T
             elseif Par.FLAG_ObsMod == 1
                 % Polar observations with gaussian noise
                 [bng, rng] = cart2pol(state(1), state(2));
-                Observs(t).r(i, :) = [bng, rng] + mvnrnd([0 0], Par.R);
+                Observs(t).r(i, :) = mvnrnd([bng, rng], Par.R);
             end
             
             % Remove missed detections

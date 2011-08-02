@@ -21,7 +21,7 @@ for tt = start_time:end_time
     obs_assigned = [];
     for jj = 1:Set.N
         if (j ~= jj) && ((Set.tracks(j).birth <= tt)&&(Set.tracks(j).death > tt))
-            ass = Set.tracks(jj).assoc(tt-Set.tracks(jj).birth+1);
+            ass = Set.tracks(jj).assoc(tt -Set.tracks(jj).birth+1);
             if ass > 0
                 obs_assigned = [obs_assigned, ass];
             end
@@ -29,16 +29,16 @@ for tt = start_time:end_time
     end
     
     % Get states
-    state = Set.tracks(jj).state{tt-Set.tracks(jj).birth+1};
+    state = Set.tracks(j).state{tt -Set.tracks(j).birth+1};
     
     % Calculate likelihood
     if any(abs(state(3:4))>Par.Vlimit)||any(abs(state(1:2))>2*Par.Xmax)
         like(k) = -inf;
     else
-        ass = Set.tracks(jj).assoc(tt-Set.tracks(jj).birth+1);
+        ass = Set.tracks(j).assoc(tt -Set.tracks(j).birth+1);
         if ass~=0
             if Par.FLAG_ObsMod == 0
-                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), state(1:2)', diag(Par.R)) );
+                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), state(1:2)', diag(Par.R)') );
             elseif Par.FLAG_ObsMod == 1
                 [bng, rng] = cart2pol(state(1), state(2));
                 if (Observs(tt).r(ass, 1) - bng) > pi
@@ -46,7 +46,7 @@ for tt = start_time:end_time
                 elseif (Observs(tt).r(ass, 1) - bng) < -pi
                     bng = bng - 2*pi;
                 end
-                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), [bng rng], diag(Par.R)) );
+                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), [bng rng], diag(Par.R)') );
             end
         end
     end
@@ -55,7 +55,7 @@ for tt = start_time:end_time
     if tt==Set.tracks(j).birth
         trans(k) = trans(k) + log(Par.UnifPosDens*Par.UnifVelDens);
     else
-        prev_state = Set.tracks(jj).state{tt-1-Set.tracks(jj).birth+1};
+        prev_state = Set.tracks(j).state{tt-1 -Set.tracks(j).birth+1};
         trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
         % trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdf(state', (Par.A * prev_state)', Par.Q) );
     end
@@ -68,7 +68,7 @@ for tt = start_time:end_time
     
     % Calculate association term
     if (Set.tracks(j).birth <= tt)&&(Set.tracks(j).death > tt)
-        ass = Set.tracks(jj).assoc(tt-Set.tracks(jj).birth+1);
+        ass = Set.tracks(j).assoc(tt -Set.tracks(j).birth+1);
         if any(ass==obs_assigned)
             assoc(k) = -inf;
             break
