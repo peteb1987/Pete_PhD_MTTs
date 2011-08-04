@@ -14,15 +14,17 @@ invR = inv(Par.R);
 invQ = inv(Par.Q);
 A = Par.A;
 
-% Get t-L state
-% if ~Par.FLAG_RB
+% Get t-L state and var
+if ~Par.FLAG_RB
     x = Set.tracks(j).state{t-L-Set.tracks(j).birth+1};
-    init_state_prob = 0;
+%     init_state_prob = 0;
+    init_var = zeros(4);
+else
+    x = Set.tracks(j).state{t-L-Set.tracks(j).birth+1};
     init_var = Set.tracks(j).covar{t-L-Set.tracks(j).birth+1};
-% else
 %     x = mvnrnd(Set.tracks(j).state{t-L-Set.tracks(j).birth+1}', Set.tracks(j).covar{t-L-Set.tracks(j).birth+1})';
 %     init_state_prob = log(mvnpdf(x', Set.tracks(j).state{t-L-Set.tracks(j).birth+1}', Set.tracks(j).covar{t-L-Set.tracks(j).birth+1})');
-% end
+end
 
 % Set offset index
 d = inf;                    % d is the number of frames after the current one (tt) in which an observation is detected
@@ -84,12 +86,12 @@ for tt = last:-1:t-L+1
     if Par.FLAG_ObsMod == 0
         if d>L
             mu = C*p_x;
-            S = R;
+            S = R + C*(A^k)*init_var*(A^k)'*C';
             for kk = 0:k-1
                 S = S + C*(A^kk)*Q*(A^kk)'*C';
             end
         else
-            xV = zeros(4);
+            xV = (A^k)*init_var*(A^k)';
             for kk = 0:k-1
                 xV = xV + (A^kk)*Q*(A^kk)';
             end
@@ -102,12 +104,12 @@ for tt = last:-1:t-L+1
     elseif Par.FLAG_ObsMod == 1
         if d>L
             mu = [p_bng; p_rng];
-            S = R;
+            S = R + J*(A^k)*init_var*(A^k)'*J';
             for kk = 0:k-1
-                S = S + J*(A^k)*Q*(A^k)'*J';
+                S = S + J*(A^kk)*Q*(A^kk)'*J';
             end
         else
-            xV = zeros(4);
+            xV = (A^k)*init_var*(A^k)';
             for kk = 0:k-1
                 xV = xV + (A^kk)*Q*(A^kk)';
             end
@@ -207,7 +209,8 @@ for tt = last:-1:t-L+1
     
 end
 
-assoc_prob = sum(frame_prob) + init_state_prob;
+% assoc_prob = sum(frame_prob) + init_state_prob;
+assoc_prob = sum(frame_prob);
 
 end
 
