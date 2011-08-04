@@ -1,4 +1,4 @@
-function [State, state_prob] = SampleStates(j, t, L, Set, Observs, no_samp)
+function [State, state_prob, Mean, Var] = SampleStates(j, t, L, Set, Observs, no_samp)
 %SAMPLESTATES Sample current states
 
 global Par;
@@ -7,6 +7,7 @@ global Par;
 if Set.tracks(j).death < t-L+1
     state_prob = 0;
     State = [];
+    Var = [];
     return
 end
 
@@ -24,7 +25,18 @@ Obs = ListAssocObservs(last, num, Set.tracks(j), Observs);
 
 % Run a Kalman filter for the target
 init_state = Set.tracks(j).state{first-1 -Set.tracks(j).birth+1};
-[Mean, Var] = KalmanFilter(Obs, init_state, Par.KFInitVar*eye(4));
+if ~Par.FLAG_RB
+    init_var = Par.KFInitVar*eye(4);
+else
+    init_var = Set.tracks(j).covar{first-1 -Set.tracks(j).birth+1};
+end
+[Mean, Var] = KalmanFilter(Obs, init_state, init_var);
+
+if Par.FLAG_RB
+    State = Mean;
+    state_prob = 0;
+    return
+end
 
 % Loop through time
 for k = L:-1:1

@@ -1,6 +1,6 @@
 function [ post ] = SingTargPosterior(j, t, L, Set, Observs)
-%SINGTARGPOSTERIOR Calculate posterior probability factor corresponging to 
-% a single target. 
+%SINGTARGPOSTERIOR Calculate posterior probability factor corresponging to
+% a single target.
 
 global Par;
 
@@ -12,6 +12,11 @@ assoc = zeros(L, 1);
 
 end_time = min(t, Set.tracks(j).death-1);
 start_time = max(t-L+1, Set.tracks(j).birth);
+
+if Par.FLAG_RB
+    Mean = Set.tracks(j).state(t-L -Set.tracks(j).birth+1:t -Set.tracks(j).birth+1);
+    Var = Set.tracks(j).covar(t-L -Set.tracks(j).birth+1:t -Set.tracks(j).birth+1);
+end
 
 % Loop through window
 for tt = start_time:end_time
@@ -37,32 +42,63 @@ for tt = start_time:end_time
     else
         ass = Set.tracks(j).assoc(tt -Set.tracks(j).birth+1);
         if ass~=0
-            if Par.FLAG_ObsMod == 0
-                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), state(1:2)', diag(Par.R)') );
-            elseif Par.FLAG_ObsMod == 1
-                [bng, rng] = cart2pol(state(1), state(2));
-                if (Observs(tt).r(ass, 1) - bng) > pi
-                    bng = bng + 2*pi;
-                elseif (Observs(tt).r(ass, 1) - bng) < -pi
-                    bng = bng - 2*pi;
+            
+            if ~Par.FLAG_RB
+                
+                % Calculate likelihood using model
+                if Par.FLAG_ObsMod == 0
+                    like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), state(1:2)', diag(Par.R)') );
+                elseif Par.FLAG_ObsMod == 1
+                    [bng, rng] = cart2pol(state(1), state(2));
+                    if (Observs(tt).r(ass, 1) - bng) > pi
+                        bng = bng + 2*pi;
+                    elseif (Observs(tt).r(ass, 1) - bng) < -pi
+                        bng = bng - 2*pi;
+                    end
+                    like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), [bng rng], diag(Par.R)') );
                 end
-                like(k) = like(k) + log( mvnpdfFastDiag(Observs(tt).r(ass, :), [bng rng], diag(Par.R)') );
+                
+            else
+                
+                % Calculate predictive likelihood using Rao-Blackwellisation
+                if Par.FLAG_ObsMod == 0
+                    C = [1 0 0 0; 0 1 0 0];
+                elseif Par.FLAG_ObsMod == 1
+                    p_x = Par.A * Mean{k};
+                    [p_bng, p_rng] = cart2pol(p_x(1), p_x(2));
+                    p_rngsq = p_rng^2;
+                    J = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+                end
+                
+                if Par.FLAG_ObsMod == 0
+                    PL_mean = C * Par.A * Mean{k};
+                    PL_var = C * ( Par.A * Var{k} * Par.A' + Par.Q ) * C' + Par.R;
+                elseif Par.FLAG_ObsMod == 1
+                    PL_mean = [p_bng; p_rng];
+                    PL_var = J * ( Par.A * Var{k} * Par.A' + Par.Q ) * J' + Par.R; PL_var = 0.5*(PL_var + PL_var');
+                end
+                like(k) = like(k) + log( mvnpdf(Observs(tt).r(ass, :), PL_mean', PL_var) );
+                
             end
         end
     end
     
-    % Calculate transition density
-    if tt==Set.tracks(j).birth
-        trans(k) = trans(k) + log(Par.UnifPosDens*Par.UnifVelDens);
-    else
-        prev_state = Set.tracks(j).state{tt-1 -Set.tracks(j).birth+1};
-        trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
-        % trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdf(state', (Par.A * prev_state)', Par.Q) );
-    end
-    
-    % See if it's died
-    if (Set.tracks(j).death == t)
-        trans(k) = trans(k) + log(Par.PDeath);
+    if ~Par.FLAG_RB
+        
+        % Calculate transition density
+        if tt==Set.tracks(j).birth
+            trans(k) = trans(k) + log(Par.UnifPosDens*Par.UnifVelDens);
+        else
+            prev_state = Set.tracks(j).state{tt-1 -Set.tracks(j).birth+1};
+            trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
+            % trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdf(state', (Par.A * prev_state)', Par.Q) );
+        end
+        
+        % See if it's died
+        if (Set.tracks(j).death == t)
+            trans(k) = trans(k) + log(Par.PDeath);
+        end
+        
     end
     
     

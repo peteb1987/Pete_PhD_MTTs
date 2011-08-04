@@ -15,7 +15,14 @@ invQ = inv(Par.Q);
 A = Par.A;
 
 % Get t-L state
-x = Set.tracks(j).state{t-L-Set.tracks(j).birth+1};
+% if ~Par.FLAG_RB
+    x = Set.tracks(j).state{t-L-Set.tracks(j).birth+1};
+    init_state_prob = 0;
+    init_var = Set.tracks(j).covar{t-L-Set.tracks(j).birth+1};
+% else
+%     x = mvnrnd(Set.tracks(j).state{t-L-Set.tracks(j).birth+1}', Set.tracks(j).covar{t-L-Set.tracks(j).birth+1})';
+%     init_state_prob = log(mvnpdf(x', Set.tracks(j).state{t-L-Set.tracks(j).birth+1}', Set.tracks(j).covar{t-L-Set.tracks(j).birth+1})');
+% end
 
 % Set offset index
 d = inf;                    % d is the number of frames after the current one (tt) in which an observation is detected
@@ -200,7 +207,7 @@ for tt = last:-1:t-L+1
     
 end
 
-assoc_prob = sum(frame_prob);
+assoc_prob = sum(frame_prob) + init_state_prob;
 
 end
 

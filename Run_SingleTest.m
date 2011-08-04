@@ -12,7 +12,9 @@ StructTemplates;
 %%% Set test-specific parameters                                        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+Par.FLAG_RB = true;
+% Par.rand_seed = 2;
+% Par.NumIt = 5000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,7 +37,8 @@ obs_fig = PlotObs(Observs, detections);
 %%% Run tracking algorithm                                              %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[ Results ] = Track_MCMC(detections, Observs, InitStates );
+% [ Results ] = Track_MCMC(detections, Observs, InitStates );
+[ Results ] = Track_SISR(detections, Observs, InitStates );
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plot and analyse                                                    %%%

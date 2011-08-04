@@ -11,7 +11,7 @@ Par.rand_seed = 0;
 %%% Scenario Flags                                                      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Par.FLAG_ObsMod = 1;                            % 0 = linear Gaussian
+Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
 Par.FLAG_SetInitStates = false;                 % false = generate starting points randomly. true = take starting points from Par.InitStates
@@ -19,6 +19,7 @@ Par.FLAG_KnownInitStates = true;                % true = initial target states k
 Par.FLAG_TargetsBorn = false;
 Par.FLAG_TargetsDie = false;
 Par.FLAG_TargetsManoeuvre = false;              % if true then accelerations must be generated
+Par.FLAG_RB = false;                             % Use Rao-Blackwellisation
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Scenario Parameters                                                 %%%
@@ -90,6 +91,8 @@ Par.KFInitVar = 1E-20;                  % Variance with which to initialise Kalm
 
 %%% For SISR schemes %%%
 Par.NumPart = 500;                      % Number of particles per target
+Par.ResamThresh = 0.1;                  % Resampling threshold as ESS/NumPart
+Par.ResampleLowWeightThresh = 30;       % Orders of magnitude below max for particle killing
 
 %%% For MCMC shemes %%%
 Par.NumIt = 2500;                       % Number of iterations

@@ -88,7 +88,9 @@ for k = 1:L
         Var{k} = PredVar{k};
         
     end
-
+    
+    Var{k} = 0.5*(Var{k}+Var{k}');
+    
 end
 
 end

@@ -25,6 +25,7 @@ else
             track = Templates.Track;
             track.birth = 0; track.death = 1; track.num = 1;
             track.state{1} = InitState{j};
+            track.covar{1} = Par.KFInitVar*eye(4);
             track.assoc = 0;
             
             % Add it to the set
@@ -69,25 +70,14 @@ for t = 1:Par.T
     disp(['*** Frame ' num2str(t) ' processed in ' num2str(toc) ' seconds']);
     disp('**************************************************************');
     
-%     if mod(t, 100)==0
-%         PlotTracks(Distns{t});
-% %         plot(Observs(t).r(:, 2).*cos(Observs(t).r(:, 1)), Observs(t).r(:, 2).*sin(Observs(t).r(:, 1)), 'x', 'color', [1,0.75,0.75]);
-% %         saveas(gcf, ['Tracks' num2str(t) '.eps'], 'epsc2');
-% %         close(gcf)
-%         pause(1);
-%     end
-    
 end
-
-
-
 
 end
 
 
 
 function [MC, BestEst, move_types] = MCMCFrame(t, L, PrevChains, PrevBest, Observs)
-% Execute a frame of the fixed-lag MCMC target tracker
+% Execute a frame of the fixed-lag MCMC-PF target tracker
 
 % t - latest time frame
 % L - window size
@@ -115,9 +105,11 @@ end
 for j = 1:PrevBest.N
     if t == PrevBest.tracks(j).death
         state = Par.A * PrevBest.tracks(j).state{t-1-PrevBest.tracks(j).birth+1};
+        covar = Par.A * PrevBest.tracks(j).covar{t-1-PrevBest.tracks(j).birth+1} * Par.A + Par.Q;
         PrevBest.tracks(j).death = PrevBest.tracks(j).death + 1;
         PrevBest.tracks(j).num = PrevBest.tracks(j).num + 1;
         PrevBest.tracks(j).state = [PrevBest.tracks(j).state; {state}];
+        PrevBest.tracks(j).covar = [PrevBest.tracks(j).covar; {covar}];
         PrevBest.tracks(j).assoc = [PrevBest.tracks(j).assoc; 0];
     end
 end
@@ -194,10 +186,12 @@ for ii = 2:Par.NumIt
             
             % Choose proposal start-point
             d = unidrnd(L);
+%             d = L;
             
             % Sample proposal
-            [new_ppsl, assoc, state] = SampleCurrent(j, t, d, New, Observs, false);
+            [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t, d, New, Observs, false);
             New.tracks(j).state(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = state;
+            New.tracks(j).covar(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = assoc;
             [old_ppsl, ~, ~] = SampleCurrent(j, t, d, Old, Observs, true);
             
@@ -218,13 +212,15 @@ for ii = 2:Par.NumIt
             
             % Extend track up to time t with blanks
             New.tracks(j).state = [New.tracks(j).state; repmat({zeros(4,1)}, sn, 1)];
+            New.tracks(j).covar = [New.tracks(j).covar; repmat({zeros(4,4)}, sn, 1)];
             New.tracks(j).assoc = [New.tracks(j).assoc; zeros(sn, 1)];
             New.tracks(j).death = t+1;
             New.tracks(j).num = New.tracks(j).death - New.tracks(j).birth;
                         
             % Propose associations
-            [new_ppsl, assoc, state] = SampleCurrent(j, t, L, New, Observs, false);
+            [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t, L, New, Observs, false);
             New.tracks(j).state(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = state;
+            New.tracks(j).covar(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = assoc;
             old_ppsl = SampleCurrent(j, t, L, Old, Observs, true);
 
@@ -252,8 +248,9 @@ for ii = 2:Par.NumIt
             New.origin_time(j) = t-sn;
                         
             % Propose associations
-            [new_ppsl, assoc, state] = SampleCurrent(j, t-L+b, b, New, Observs, false);
+            [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t-L+b, b, New, Observs, false);
             New.tracks(j).state(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = state;
+            New.tracks(j).covar(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = assoc;
             old_ppsl = SampleCurrent(j, t-L+b, b, Old, Observs, true);
 
