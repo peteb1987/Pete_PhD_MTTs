@@ -14,21 +14,22 @@ StructTemplates;
 
 % Par.rand_seed = 0;
 Par.T = 20;
-% Par.NumTgts = 5;
-Par.FLAG_SetInitStates = true;
-Par.InitStates = {[0; 200; 2; 0];
-                  [0; 210; 2; 0];
-                  [0; 220; 2; 0];
-                  [0; 230; 2; 0];
-                  [0; 240; 2; 0];};
-Par.ProcNoiseVar = 0.3;
-Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
-Par.ObsNoiseVar = 3;
-Par.R = Par.ObsNoiseVar * eye(2);
-Par.ExpClutObs = 10;
-Par.PDetect = 0.9;
+% Par.NumTgts = 1;
+% Par.FLAG_SetInitStates = true;
+% Par.InitStates = {[0; 200; 2; 0];
+%                   [0; 210; 2; 0];
+%                   [0; 220; 2; 0];
+%                   [0; 230; 2; 0];
+%                   [0; 240; 2; 0];};
+% Par.ProcNoiseVar = 0.5;
+% Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
+% Par.ObsNoiseVar = 2;
+% Par.R = Par.ObsNoiseVar * eye(2);
+% Par.ExpClutObs = 1000;
+% Par.PDetect = 0.75;
 
-Par.FLAG_AlgType = 3;
+Par.FLAG_AlgType = 2;
+Par.L = 1;
 
 Par.FLAG_RB = false;
 Par.NumIt = 5000;
@@ -47,7 +48,7 @@ RandStream.setDefaultStream(s);
 [TrueTracks, InitStates] = GenerateStates();
 
 % Generate observations from target states
-[Observs, detections] = GenerateObservations(TrueTracks);
+[Observs, TrueTracks, detections] = GenerateObservations(TrueTracks);
 
 % Plot states and observations
 state_fig = PlotTrueTracks(TrueTracks);

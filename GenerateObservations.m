@@ -1,4 +1,4 @@
-function [ Observs, hits ] = GenerateObservations( TrueTracks )
+function [ Observs, TrueTracks, hits ] = GenerateObservations( TrueTracks )
 %GENERATEOBSERVATIONS Generate a set of observations from a set of known tracks
 
 global Par;
@@ -45,6 +45,7 @@ for t = 1:T
             state = TrueTracks{j}.state{t-TrueTracks{j}.birth+1};
             
             hits(t, j) = i;
+            TrueTracks{j}.assoc(t -TrueTracks{j}.birth+1) = i;
             
             if Par.FLAG_ObsMod == 0
                 % Cartesian observations with gaussian noise
@@ -59,6 +60,7 @@ for t = 1:T
             % Remove missed detections
             if rand < (1-Par.PDetect)
                 hits(t, j) = 0;
+                TrueTracks{j}.assoc(t -TrueTracks{j}.birth+1) = 0;
                 Observs(t).r(i, :) = [];
                 Observs(t).N = Observs(t).N - 1;
                 num_tgts = num_tgts - 1;

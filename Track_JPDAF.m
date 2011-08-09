@@ -42,9 +42,9 @@ for t = 1:Par.T
     disp(['*** Now processing frame ' num2str(t)]);
     
     if t==1
-        [Results{t}] = PDAFFrame(t, t, InitEst, Observs);
+        [Results{t}] = PDAFFrame(t, InitEst, Observs);
     else
-        [Results{t}] = PDAFFrame(t, min(t,Par.L), Results{t-1}, Observs);
+        [Results{t}] = PDAFFrame(t, Results{t-1}, Observs);
     end
     
     disp(['*** Frame ' num2str(t) ' processed in ' num2str(toc) ' seconds']);
@@ -56,7 +56,7 @@ end
 
 
 
-function Est = PDAFFrame(t, L, PrevEst, Observs)
+function Est = PDAFFrame(t, PrevEst, Observs)
 
 global Par;
 
@@ -81,6 +81,7 @@ C = cell(Par.NumTgts,1);
 S = cell(Par.NumTgts,1);
 gated_innov = cell(Par.NumTgts,1);
 validated = cell(Par.NumTgts,1);
+likes = cell(Par.NumTgts,1);
 
 for j = 1:Par.NumTgts
     
@@ -174,9 +175,9 @@ if ~indep
             joint_assoc(ii) = 1;
             for j=1:Par.NumTgts
                 if assoc_list(ii,j)==0
-                    joint_assoc(ii) = joint_assoc(ii) * Par.ClutDens;
+                    joint_assoc(ii) = joint_assoc(ii) * Par.ClutDens * (1-Par.PDetect);
                 else
-                    joint_assoc(ii) = joint_assoc(ii) * likes{j}(validated{j}==assoc_list(ii,j));
+                    joint_assoc(ii) = joint_assoc(ii) * likes{j}(validated{j}==assoc_list(ii,j)) * Par.PDetect;
                 end
             end
         else
