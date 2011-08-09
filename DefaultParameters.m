@@ -11,6 +11,7 @@ Par.rand_seed = 0;
 %%% Scenario Flags                                                      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Par.FLAG_AlgType = 0;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
 Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
@@ -56,7 +57,6 @@ Par.A = [1 0 P 0; 0 1 0 P; 0 0 1 0; 0 0 0 1];                              % 2D 
 Par.B = [P^2/2*eye(2); P*eye(2)];                                          % 2D input transition matrix (used in track generation when we impose a deterministic acceleration)
 Par.Q = Par.ProcNoiseVar * ...
     [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];          % Gaussian motion covariance matrix (discretised continous random model)
-%     [P^4/4 0 P^3/2 0; 0 P^4/4 0 P^3/2; P^3/2 0 P^2 0; 0 P^3/2 0 P^2];      % Gaussian motion covariance matrix (piecewise constant acceleration discrete random model)
 Par.ExpBirth = 0.1;                                                        % Expected number of new targets in a frame (poisson deistributed)
 Par.PDeath = 0.01;                                                          % Probability of a (given) target death in a frame
 if ~Par.FLAG_TargetsDie, Par.PDeath = 0; end
@@ -97,5 +97,6 @@ Par.ResampleLowWeightThresh = 30;       % Orders of magnitude below max for part
 %%% For MCMC shemes %%%
 Par.NumIt = 2500;                       % Number of iterations
 Par.S = Par.L;                          % Max distance previously from which particles are sampled
+Par.BridgeLength = 1;                   % Length of bridge for bridging-history proposals.
 Par.Restart = 10000;                    % Restart after this many iterations
 Par.BurnIn = floor(0.1*Par.NumIt);      % Length of burn-in

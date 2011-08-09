@@ -50,7 +50,7 @@ new_weight = new_weight/sum(new_weight);
 new_weight = log(new_weight);
 
 % Construct new, resampled array
-for ii = 1:Par.NumPart
+for ii = 1:Np
     Resampled.particles{ii}.tracks(j) = PartSet.particles{samp(ii)}.tracks(j);
 end
 Resampled.weights{j} = new_weight;

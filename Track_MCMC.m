@@ -55,6 +55,7 @@ for t = 1:Par.T
     end
     
     Results{t}.particles = Chains{t}.particles;
+    Results{t}.posteriors = Chains{t}.posteriors;
     
     disp(['*** Correct associations at frame ' num2str(t-min(t,Par.L)+1) ': ' num2str(detections(t-min(t,Par.L)+1,:))]);
     assoc = [];
@@ -88,7 +89,7 @@ function [MC, BestEst, move_types] = MCMCFrame(t, L, PrevChains, PrevBest, Obser
 global Par;
 
 s = min(t,Par.S);
-b = 2;
+b = Par.BridgeLength;
 
 % Create stores to log probabilities to prevent repeat calculations
 posterior_store = -inf(Par.NumIt, Par.NumTgts);
@@ -143,27 +144,39 @@ for ii = 2:Par.NumIt
     reverse_kernel_store(ii,:) = reverse_kernel_store(ii-1,:);
     origin_post_store(ii,:) = origin_post_store(ii-1,:);
     
-%     % Restart chain if required
-%     if (mod(ii, Par.Restart)==1)
-%         
-%         k = max(1,t-1);
-%         weights = exp(sum(PrevChains{max(1,t-1)}.posteriors, 2));
-%         weights = weights / sum(weights);
-%         new_part = randsample(size(PrevChains{k}.particles, 1), 1, true, weights);
-%         Old = PrevChains{k}.particles{new_part}.Copy;
-%         Old.ProjectTracks(t);
-%         MC.particles{ii-1} = Old.Copy;
-%         New = Old.Copy;
-%         
-%         for j = 1:Par.NumTgts
-%             MC.posteriors(ii-1, j) = -inf;
-%             MC.posteriors(ii, j) = -inf;
-%             posterior_store(ii-1, j) = SingTargPosterior(j, t, L, New, Observs);
-%             reverse_kernel_store(ii-1, j) = New.Sample(j, t-1, L-1, Observs, true);
-%             origin_post_store(ii-1, j) = SingTargPosterior(j, t-1, L-1, New, Observs);
-%         end
-%         
-%     end
+    % Restart chain if required
+    if (mod(ii, Par.Restart)==1)
+        
+        k = max(1,t-1);
+        weights = exp(sum(PrevChains{k}.posteriors, 2));
+        weights = weights / sum(weights);
+        new_part = randsample(size(PrevChains{k}.particles, 1), 1, true, weights);
+        Old = PrevChains{k}.particles{new_part};
+        
+        % Project tracks forward
+        for j = 1:Old.N
+            if t == Old.tracks(j).death
+                state = Par.A * Old.tracks(j).state{t-1-Old.tracks(j).birth+1};
+                covar = Par.A * Old.tracks(j).covar{t-1-Old.tracks(j).birth+1} * Par.A + Par.Q;
+                Old.tracks(j).death = Old.tracks(j).death + 1;
+                Old.tracks(j).num = Old.tracks(j).num + 1;
+                Old.tracks(j).state = [Old.tracks(j).state; {state}];
+                Old.tracks(j).covar = [Old.tracks(j).covar; {covar}];
+                Old.tracks(j).assoc = [Old.tracks(j).assoc; 0];
+            end
+        end
+        
+        New = Old;
+        
+        for j = 1:Par.NumTgts
+            MC.posteriors(ii-1, j) = -inf;
+            MC.posteriors(ii, j) = -inf;
+            posterior_store(ii-1, j) = SingTargPosterior(j, t, L, New, Observs);
+            reverse_kernel_store(ii-1, j) = SampleCurrent(j, t-1, L-1, New, Observs, true);
+            origin_post_store(ii-1, j) = SingTargPosterior(j, t-1, L-1, New, Observs);
+        end
+        
+    end
     
     % Choose target
 %     j = unidrnd(New.N);

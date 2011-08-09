@@ -38,6 +38,7 @@ end
 InitPartSet = struct( 'particles', [], 'weights', []);
 InitPartSet.weights = repmat({log(ones(Par.NumPart,1)/Par.NumPart)}, Par.NumTgts, 1);
 InitPartSet.particles = repmat({InitEst}, Par.NumPart, 1);
+InitPartSet.posteriors = zeros(Par.NumPart, Par.NumTgts);
 
 % Loop through time
 for t = 1:Par.T
@@ -54,6 +55,7 @@ for t = 1:Par.T
     end
     
     Results{t}.particles = PartSets{t}.particles;
+    Results{t}.posteriors = PartSets{t}.posteriors;
     
     disp(['*** Correct associations at frame ' num2str(t-min(t,Par.L)+1) ': ' num2str(detections(t-min(t,Par.L)+1,:))]);
     assoc = [];
@@ -145,6 +147,9 @@ for ii = 1:Par.NumPart
             weights{j}(ii) = -inf;
         end
         
+        % Store posterior
+        PartSet.posteriors(ii,j) = post;
+        
     end
     
     % Now update the actual estimate
@@ -174,6 +179,7 @@ for j = 1:Par.NumTgts
     
     if (ESS_pre(j) < Par.ResamThresh*Par.NumPart)
         [PartSet] = ConservativeResample(j, PartSet, weights{j});
+%         [PartSet] = SystematicResample(j, PartSet, weights{j});
         ESS_post(j) = CalcESS(PartSet.weights{j});
         disp(['*** Target Cluster' num2str(j) ': Effective Sample Size = ' num2str(ESS_pre(j)) '. RESAMPLED (Conservative). ESS = ' num2str(ESS_post(j))]);
     else

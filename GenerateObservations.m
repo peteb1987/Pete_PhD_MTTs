@@ -2,7 +2,6 @@ function [ Observs, hits ] = GenerateObservations( TrueTracks )
 %GENERATEOBSERVATIONS Generate a set of observations from a set of known tracks
 
 global Par;
-global Templates;
 
 % Simple Observation Generator - Observe target with probability PDetect and
 % Gaussian observation noise ObsNoiseVar. Poisson clutter.
@@ -11,7 +10,9 @@ global Templates;
 T = Par.T;               % Number of frames
 
 % Create a structure to store observations
-Observs = Templates.Observs;
+obs = struct('r', [], 'N', []);             % r is an array of observations (one per row).
+                                            % N is the number of observations
+Observs = repmat(obs, Par.T, 1);
 
 % Create a cell array to store inidices of target observations
 hits = zeros(T, Par.NumTgts);
