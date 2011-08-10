@@ -14,7 +14,7 @@ StructTemplates;
 
 % Par.rand_seed = 0;
 Par.T = 20;
-% Par.NumTgts = 1;
+Par.NumTgts = 1;
 % Par.FLAG_SetInitStates = true;
 % Par.InitStates = {[0; 200; 2; 0];
 %                   [0; 210; 2; 0];
@@ -28,11 +28,11 @@ Par.T = 20;
 % Par.ExpClutObs = 1000;
 % Par.PDetect = 0.75;
 
-Par.FLAG_AlgType = 2;
-Par.L = 1;
+Par.FLAG_AlgType = 1;
+Par.L = 5;
 
-Par.FLAG_RB = false;
-Par.NumIt = 5000;
+Par.FLAG_RB = true;
+Par.NumIt = 500;
 
 % Par.NumTgts = 1;
 % Par.T = 10;

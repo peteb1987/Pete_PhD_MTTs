@@ -61,15 +61,15 @@ for j = 1:N
         % Sample state from Gaussian
         TrueTracks{j}.state{k} = mvnrnd(exp_state', Par.Q)';
 
-        % Kill if outside scene
-        if (Par.FLAG_ObsMod==0) && any(abs( TrueTracks{j}.state{k}(1:2))>Par.Xmax) || ...
-                (Par.FLAG_ObsMod==1) && any(sqrt(sum( TrueTracks{j}.state{k}(1:2).^2))>Par.Xmax)
-            TrueTracks{j}.state(k:end) = [];
-            TrueTracks{j}.assoc(k:end) = [];
-            TrueTracks{j}.death = TrueTracks{j}.birth + k - 1;
-            TrueTracks{j}.num = TrueTracks{j}.death - TrueTracks{j}.birth;
-            break;
-        end
+%         % Kill if outside scene
+%         if (Par.FLAG_ObsMod==0) && any(abs( TrueTracks{j}.state{k}(1:2))>Par.Xmax) || ...
+%                 (Par.FLAG_ObsMod==1) && any(sqrt(sum( TrueTracks{j}.state{k}(1:2).^2))>Par.Xmax)
+%             TrueTracks{j}.state(k:end) = [];
+%             TrueTracks{j}.assoc(k:end) = [];
+%             TrueTracks{j}.death = TrueTracks{j}.birth + k - 1;
+%             TrueTracks{j}.num = TrueTracks{j}.death - TrueTracks{j}.birth;
+%             break;
+%         end
         
         % Limit velocity
         TrueTracks{j}.state{k}(3:4) = min( max( TrueTracks{j}.state{k}(3:4), -Par.Vmax), Par.Vmax);

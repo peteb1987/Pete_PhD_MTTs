@@ -50,7 +50,7 @@ for t = 1:Par.T
     if t==1
         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, t, {InitChain}, InitEst, Observs);
     else
-%         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, min(t,Par.L), Chains(1:t), BestEsts{max(1,t-Par.S)}.Copy, Observs);
+        %         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, min(t,Par.L), Chains(1:t), BestEsts{max(1,t-Par.S)}.Copy, Observs);
         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, min(t,Par.L), Chains(1:t), BestEsts{t-1}, Observs);
     end
     
@@ -71,6 +71,26 @@ for t = 1:Par.T
     disp(['*** Frame ' num2str(t) ' processed in ' num2str(toc) ' seconds']);
     disp('**************************************************************');
     
+end
+
+% Kalman smooth the states
+if Par.FLAG_RB
+    for t = 1:Par.T
+        for ii = 1:Par.NumIt
+            for j = 1:Par.NumTgts
+                last = min(t, Chains{t}.particles{ii}.tracks(j).death - 1);
+                first = max(1, Chains{t}.particles{ii}.tracks(j).birth+1);
+                num = last - first + 1;
+                Obs = ListAssocObservs(last, num, Chains{t}.particles{ii}.tracks(j), Observs);
+                init_state = Chains{t}.particles{ii}.tracks(j).state{first-1 -Chains{t}.particles{ii}.tracks(j).birth+1};
+                init_var = Par.KFInitVar*eye(4);
+                [ Mean, Var ] = KalmanSmoother( Obs, init_state, init_var );
+                Chains{t}.particles{ii}.tracks(j).state(first -Chains{t}.particles{ii}.tracks(j).birth+1:last -Chains{t}.particles{ii}.tracks(j).birth+1) = Mean;
+            end
+        end
+        Results{t}.particles = Chains{t}.particles;
+        Results{t}.posteriors = Chains{t}.posteriors;
+    end
 end
 
 end
@@ -179,13 +199,13 @@ for ii = 2:Par.NumIt
     end
     
     % Choose target
-%     j = unidrnd(New.N);
+    %     j = unidrnd(New.N);
     j = mod(ii, New.N)+1;
     
     % Randomly select move type
     if t > Par.L
         type_weights = [2 1 1];
-%         type_weights = [1 0 0];
+        %         type_weights = [1 0 0];
     else
         type_weights = [1 0 0];
     end
@@ -199,7 +219,7 @@ for ii = 2:Par.NumIt
             
             % Choose proposal start-point
             d = unidrnd(L);
-%             d = L;
+            %             d = L;
             
             % Sample proposal
             [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t, d, New, Observs, false);
@@ -211,7 +231,7 @@ for ii = 2:Par.NumIt
             
         case 2 % Single target, history and window - assumes independence for frames <= t-L
             
-%             sn = s;
+            %             sn = s;
             sn = unidrnd(s);
             k = t-sn;
             
@@ -229,18 +249,18 @@ for ii = 2:Par.NumIt
             New.tracks(j).assoc = [New.tracks(j).assoc; zeros(sn, 1)];
             New.tracks(j).death = t+1;
             New.tracks(j).num = New.tracks(j).death - New.tracks(j).birth;
-                        
+            
             % Propose associations
             [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t, L, New, Observs, false);
             New.tracks(j).state(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = state;
             New.tracks(j).covar(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-L+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = assoc;
             old_ppsl = SampleCurrent(j, t, L, Old, Observs, true);
-
+            
             
         case 3 % Single target, history and bridging region - assumes independence for frames <= t-L
             
-%             sn = s;
+            %             sn = s;
             sn = unidrnd(s);
             k = t-sn;
             
@@ -259,23 +279,23 @@ for ii = 2:Par.NumIt
             
             New.origin(j) = new_part;
             New.origin_time(j) = t-sn;
-                        
+            
             % Propose associations
             [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t-L+b, b, New, Observs, false);
             New.tracks(j).state(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = state;
             New.tracks(j).covar(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-L+1 -New.tracks(j).birth+1:t-L+b -New.tracks(j).birth+1) = assoc;
             old_ppsl = SampleCurrent(j, t-L+b, b, Old, Observs, true);
-
+            
     end
-                
+    
     % Find origin posteriors and reverse kernels
     if ~(type==1)
         new_origin_post = SingTargPosterior(j, t-sn, L-sn, NewOrigin, Observs);
         if (sn < L)
             new_reverse_kernel = SampleCurrent(j, t-sn, L-sn, NewOrigin, Observs, true);
-%             new_reverse_kernel = NewOrigin.ReverseKernel(j, t-sn, L-sn, New, Observs);
-%             new_reverse_kernel = 0;
+            %             new_reverse_kernel = NewOrigin.ReverseKernel(j, t-sn, L-sn, New, Observs);
+            %             new_reverse_kernel = 0;
         else
             new_reverse_kernel = 0;
         end
@@ -290,7 +310,7 @@ for ii = 2:Par.NumIt
     % Calculate posteriors
     new_post = SingTargPosterior(j, t, L, New, Observs);
     old_post = posterior_store(ii-1, j);
-
+    
     % Test for acceptance
     ap = (new_post - old_post) ...
         + (old_origin_post - new_origin_post) ...
@@ -318,7 +338,7 @@ for ii = 2:Par.NumIt
         MC.posteriors(ii,j) = old_post;
         
         posterior_store(ii,j) = old_post;
-%         ppsl_store(ii,j) = old_ppsl;
+        %         ppsl_store(ii,j) = old_ppsl;
         reverse_kernel_store(ii,j) = old_reverse_kernel;
         origin_post_store(ii,j) = old_origin_post;
         

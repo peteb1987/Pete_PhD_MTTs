@@ -40,7 +40,7 @@ Par.InitStates = {};                            % Cell array of target starting 
 if Par.FLAG_ObsMod == 0
     Par.UnifPosDens = 1/(2*Par.Xmax)^2;         % Uniform density on position
     Par.ClutDens = Par.UnifPosDens;             % Clutter density in observation space
-    Par.MaxInitStateDist = 0.5;                 % Farthest a target may be initialised to the origin
+    Par.MaxInitStateDist = 0.35;                 % Farthest a target may be initialised to the origin
 elseif Par.FLAG_ObsMod == 1
     Par.UnifPosDens = 1/(pi*Par.Xmax^2);        % Uniform density on position
     Par.ClutDens = (1/Par.Xmax)*(1/(2*pi));     % Clutter density in observation space
@@ -85,6 +85,8 @@ end
 %%% Algorithm parameters                                                %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Par.AnalysisLag = 5;
+
 Par.L = 5;                              % Length of rolling window
 Par.Vlimit = 1.5*Par.Vmax;              % Limit above which we do not accept velocity (lh=0)
 Par.KFInitVar = 1E-20;                  % Variance with which to initialise Kalman Filters (scaled identity matrix)
@@ -95,7 +97,7 @@ Par.ResamThresh = 0.1;                  % Resampling threshold as ESS/NumPart
 Par.ResampleLowWeightThresh = 30;       % Orders of magnitude below max for particle killing
 
 %%% For MCMC shemes %%%
-Par.NumIt = 2500;                       % Number of iterations
+Par.NumIt = 5000;                       % Number of iterations
 Par.S = Par.L;                          % Max distance previously from which particles are sampled
 Par.BridgeLength = 1;                   % Length of bridge for bridging-history proposals.
 Par.Restart = 10000;                    % Restart after this many iterations

@@ -7,10 +7,12 @@ dbstop if error
 % How many tests?
 num_tests = 10;
 
-Stats = repmat(struct('MMSE', [], 'LostTracks', []), num_tests, 1);
+Stats = struct('MMSE', zeros(num_tests,1), 'LostTracks', zeros(num_tests,1));
 
 % Test loop
 for c = 1:num_tests
+    
+    close all
     
     % Set default parameters
     DefaultParameters;
@@ -21,9 +23,10 @@ for c = 1:num_tests
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     Par.FLAG_AlgType = 0;
+    Par.L = 5;
+    Par.S = 5;
     
-    Par.T = 20;
-    Par.NumTgts = 1;
+    Par.FLAG_RB = true;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,9 +71,14 @@ for c = 1:num_tests
     end
     
     if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1)
-        [Stats(c).RMSE_MMSE, Stats(c).RMSE_MAP, Stats(c).prop_ass, Stats(c).num_lost] = BasicParticleAnalysis(TrueTracks, Results);
+        [Stats.RMSE_MMSE(c), Stats.RMSE_MAP(c), Stats.prop_ass(c), Stats.num_lost(c)] = BasicParticleAnalysis(TrueTracks, Results);
+        total_RMSE = sqrt( sum(Stats.RMSE_MMSE.^2 .* (Par.NumTgts - Stats.num_lost))/sum(Par.NumTgts - Stats.num_lost) );
+        total_prop_ass = sum( Stats.prop_ass .* (Par.NumTgts - Stats.num_lost) )/sum(Par.NumTgts - Stats.num_lost);
+        total_lost = sum(Stats.num_lost)/(num_tests*Par.NumTgts);
     elseif (Par.FLAG_AlgType == 2) || (Par.FLAG_AlgType == 3)
-        [Stats(c).RMSE, Stats(c).num_lost] = BasicPointEstAnalysis(TrueTracks, Results);
+        [Stats.RMSE(c), Stats.num_lost(c)] = BasicPointEstAnalysis(TrueTracks, Results);
+        total_RMSE = sqrt( sum(Stats.RMSE.^2 .* (Par.NumTgts - Stats.num_lost))/sum(Par.NumTgts - Stats.num_lost) );
+        total_lost = sum(Stats.num_lost)/(num_tests*Par.NumTgts);
     end
     
 end

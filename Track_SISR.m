@@ -71,6 +71,26 @@ for t = 1:Par.T
     
 end
 
+% Kalman smooth the states
+if Par.FLAG_RB
+    for t = 1:Par.T
+        for ii = 1:Par.NumPart
+            for j = 1:Par.NumTgts
+                last = min(t, PartSets{t}.particles{ii}.tracks(j).death - 1);
+                first = max(1, PartSets{t}.particles{ii}.tracks(j).birth+1);
+                num = last - first + 1;
+                Obs = ListAssocObservs(last, num, PartSets{t}.particles{ii}.tracks(j), Observs);
+                init_state = PartSets{t}.particles{ii}.tracks(j).state{first-1 -PartSets{t}.particles{ii}.tracks(j).birth+1};
+                init_var = Par.KFInitVar*eye(4);
+                [ Mean, ~ ] = KalmanSmoother( Obs, init_state, init_var );
+                PartSets{t}.particles{ii}.tracks(j).state(first -PartSets{t}.particles{ii}.tracks(j).birth+1:last -PartSets{t}.particles{ii}.tracks(j).birth+1) = Mean;
+            end
+        end
+        Results{t}.particles = PartSets{t}.particles;
+        Results{t}.posteriors = PartSets{t}.posteriors;
+    end
+end
+
 end
 
 

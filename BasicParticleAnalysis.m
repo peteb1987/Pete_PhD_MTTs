@@ -9,7 +9,7 @@ SE_MAP = zeros(Par.T, Par.NumTgts);
 LostTracks = false(1, Par.NumTgts);
 CorrectAssociations = zeros(Par.T, Par.NumTgts);
 
-for t = Par.L:Par.T
+for t = Par.AnalysisLag:Par.T
     
     for j = 1:Par.NumTgts
         
@@ -26,22 +26,22 @@ for t = Par.L:Par.T
         
         % Get MAP state
         MAP_idx = find(sum(Results{t}.posteriors,2)==max(sum(Results{t}.posteriors,2)), 1);
-        MAP_state = Results{t}.particles{MAP_idx}.tracks(j).state{t-Par.L+1 -Results{t}.particles{MAP_idx}.tracks(j).birth+1};
+        MAP_state = Results{t}.particles{MAP_idx}.tracks(j).state{t-Par.AnalysisLag+1 -Results{t}.particles{MAP_idx}.tracks(j).birth+1};
 
         % MMSE estimate
-        state = cellfun(@(x) x.tracks(j).state(t-Par.L+1 -x.tracks(j).birth+1), Results{t}.particles);
+        state = cellfun(@(x) x.tracks(j).state(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
         MMSE_state = mean(cell2mat(state'),2);
 
         % Get true state
-        true_state = TrueTracks{j}.state{t-Par.L+1 -TrueTracks{j}.birth+1};
+        true_state = TrueTracks{j}.state{t-Par.AnalysisLag+1 -TrueTracks{j}.birth+1};
         
         % Squared Error
         SE_MMSE(t, j) = sum((true_state(1:2)-MMSE_state(1:2)).^2);
         SE_MAP(t, j) = sum((true_state(1:2)-MAP_state(1:2)).^2);
         
         % Count correct associations
-        assoc = cellfun(@(x) x.tracks(j).assoc(t-Par.L+1 -x.tracks(j).birth+1), Results{t}.particles);
-        true_assoc = TrueTracks{j}.assoc(t-Par.L+1 -TrueTracks{j}.birth+1);
+        assoc = cellfun(@(x) x.tracks(j).assoc(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
+        true_assoc = TrueTracks{j}.assoc(t-Par.AnalysisLag+1 -TrueTracks{j}.birth+1);
         CorrectAssociations(t,j) = sum(assoc==true_assoc);
         
         % Find lost tracks
@@ -50,7 +50,7 @@ for t = Par.L:Par.T
         else
             tracking = true;
         end
-        for tt = t-min(t,5)+2:t
+        for tt = t-Par.AnalysisLag+2:t
             assoc = cellfun(@(x) x.tracks(j).assoc(tt -x.tracks(j).birth+1), Results{t}.particles);
             true_assoc = TrueTracks{j}.assoc(tt -TrueTracks{j}.birth+1);
             if (true_assoc~=0)&&(sum(assoc==true_assoc)>0)
@@ -67,11 +67,11 @@ for t = Par.L:Par.T
     
 end
 
-prop_ass = sum(CorrectAssociations(:)) / ( Par.NumTgts*(Par.T-Par.L+1)*length(Results{end}.particles) );
+prop_ass = sum(CorrectAssociations(:)) / ( Par.NumTgts*(Par.T-Par.AnalysisLag+1)*length(Results{end}.particles) );
 num_lost = sum(LostTracks);
 
-SE_MMSE(1:Par.L-1, :) = [];
-SE_MAP(1:Par.L-1, :) = [];
+SE_MMSE(1:Par.AnalysisLag-1, :) = [];
+SE_MAP(1:Par.AnalysisLag-1, :) = [];
 SE_MMSE(:,LostTracks) = [];
 SE_MAP(:,LostTracks) = [];
 RMSE_MMSE = sqrt(mean(SE_MMSE(:)));
