@@ -26,10 +26,18 @@ for t = Par.AnalysisLag:Par.T
         
         % Get MAP state
         MAP_idx = find(sum(Results{t}.posteriors,2)==max(sum(Results{t}.posteriors,2)), 1);
-        MAP_state = Results{t}.particles{MAP_idx}.tracks(j).state{t-Par.AnalysisLag+1 -Results{t}.particles{MAP_idx}.tracks(j).birth+1};
+        if ~Par.FLAG_RB
+            MAP_state = Results{t}.particles{MAP_idx}.tracks(j).state{t-Par.AnalysisLag+1 -Results{t}.particles{MAP_idx}.tracks(j).birth+1};
+        else
+            MAP_state = Results{t}.particles{MAP_idx}.tracks(j).smooth{t-Par.AnalysisLag+1 -Results{t}.particles{MAP_idx}.tracks(j).birth+1};
+        end
 
         % MMSE estimate
-        state = cellfun(@(x) x.tracks(j).state(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
+        if ~Par.FLAG_RB
+            state = cellfun(@(x) x.tracks(j).state(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
+        else
+            state = cellfun(@(x) x.tracks(j).smooth(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
+        end
         MMSE_state = mean(cell2mat(state'),2);
 
         % Get true state

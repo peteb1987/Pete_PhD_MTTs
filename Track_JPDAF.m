@@ -42,9 +42,9 @@ for t = 1:Par.T
     disp(['*** Now processing frame ' num2str(t)]);
     
     if t==1
-        [Results{t}] = PDAFFrame(t, InitEst, Observs);
+        [Results{t}] = JPDAFFrame(t, InitEst, Observs);
     else
-        [Results{t}] = PDAFFrame(t, Results{t-1}, Observs);
+        [Results{t}] = JPDAFFrame(t, Results{t-1}, Observs);
     end
     
     disp(['*** Frame ' num2str(t) ' processed in ' num2str(toc) ' seconds']);
@@ -56,7 +56,7 @@ end
 
 
 
-function Est = PDAFFrame(t, PrevEst, Observs)
+function Est = JPDAFFrame(t, PrevEst, Observs)
 
 global Par;
 
@@ -66,7 +66,7 @@ Est = PrevEst;
 for j = 1:Est.N
     if t == Est.tracks(j).death
         state = Par.A * Est.tracks(j).state{t-1-Est.tracks(j).birth+1};
-        covar = Par.A * Est.tracks(j).covar{t-1-Est.tracks(j).birth+1} * Par.A + Par.Q;
+        covar = Par.A * Est.tracks(j).covar{t-1-Est.tracks(j).birth+1} * Par.A' + Par.Q;
         Est.tracks(j).death = Est.tracks(j).death + 1;
         Est.tracks(j).num = Est.tracks(j).num + 1;
         Est.tracks(j).state = [Est.tracks(j).state; {state}];
@@ -95,13 +95,13 @@ for j = 1:Par.NumTgts
         
     elseif Par.FLAG_ObsMod == 1
         C{j} = zeros(2, 4);
-        x1 = pred_state(1); x2 = pred_state(2);
+        x1 = pred_state{j}(1); x2 = pred_state{j}(2);
         C{j}(1,1) = -x2/(x1^2+x2^2);
         C{j}(1,2) = x1/(x1^2+x2^2);
         C{j}(2,1) = x1/sqrt(x1^2+x2^2);
         C{j}(2,2) = x2/sqrt(x1^2+x2^2);
         
-        [bng, rng] = cart2pol(pred_state(1), pred_state(2));
+        [bng, rng] = cart2pol(pred_state{j}(1), pred_state{j}(2));
         mu = [bng; rng];
         
     end
@@ -175,9 +175,9 @@ if ~indep
             joint_assoc(ii) = 1;
             for j=1:Par.NumTgts
                 if assoc_list(ii,j)==0
-                    joint_assoc(ii) = joint_assoc(ii) * Par.ClutDens * (1-Par.PDetect);
+                    joint_assoc(ii) = joint_assoc(ii) * (1-Par.PDetect) * Par.ExpClutObs * Par.ClutDens;
                 else
-                    joint_assoc(ii) = joint_assoc(ii) * likes{j}(validated{j}==assoc_list(ii,j)) * Par.PDetect;
+                    joint_assoc(ii) = joint_assoc(ii) * Par.PDetect * likes{j}(validated{j}==assoc_list(ii,j));
                 end
             end
         else
@@ -193,7 +193,7 @@ for j = 1:Par.NumTgts
     % Caluclate association probs
     if indep
         assocs = Par.PDetect * mvnpdf(gated_innov{j}', [0 0], S{j});
-        assoc_clut = Par.ClutDens * (1-Par.PDetect) / Par.PDetect;
+        assoc_clut = (1-Par.PDetect)*Par.ExpClutObs*Par.ClutDens;
     else
         assocs = zeros(num_valid(j)-1,1);
         for ii = 1:num_valid(j)-1
@@ -216,9 +216,9 @@ for j = 1:Par.NumTgts
     % Calculate covariance estimate
     weighted_variance = zeros(2, 2, length(validated{j}));
     for i = 1:length(validated{j})
-        weighted_variance(:,:,i) = assocs(i) * gated_innov{j}(:, i)' * gated_innov{j}(:, i);
+        weighted_variance(:,:,i) = assocs(i) * gated_innov{j}(:, i) * gated_innov{j}(:, i)';
     end
-    middle_bit = sum(weighted_variance, 3) - tot_innov'*tot_innov;
+    middle_bit = sum(weighted_variance, 3) - tot_innov*tot_innov';
     est_covar = assoc_clut*pred_covar{j} + (1-assoc_clut)*(pred_covar{j}-W*S{j}*W') + W*middle_bit*W';
     
     % Update track

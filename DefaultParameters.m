@@ -5,14 +5,14 @@
 
 global Par;
 
-Par.rand_seed = 0;
+Par.rand_seed = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Scenario Flags                                                      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Par.FLAG_AlgType = 0;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
-Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
+Par.FLAG_ObsMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
 Par.FLAG_SetInitStates = false;                 % false = generate starting points randomly. true = take starting points from Par.InitStates
@@ -40,13 +40,13 @@ Par.InitStates = {};                            % Cell array of target starting 
 if Par.FLAG_ObsMod == 0
     Par.UnifPosDens = 1/(2*Par.Xmax)^2;         % Uniform density on position
     Par.ClutDens = Par.UnifPosDens;             % Clutter density in observation space
-    Par.MaxInitStateDist = 0.35;                 % Farthest a target may be initialised to the origin
 elseif Par.FLAG_ObsMod == 1
     Par.UnifPosDens = 1/(pi*Par.Xmax^2);        % Uniform density on position
     Par.ClutDens = (1/Par.Xmax)*(1/(2*pi));     % Clutter density in observation space
-    Par.MinInitStateRadius = 0.25;              % Nearest a target may be initialised to the origin
-    Par.MaxInitStateRadius = 0.35;              % Farthest a target may be initialised to the origin
 end
+Par.MaxInitStateDist = 0.35;                 % Farthest a target may be initialised to the origin
+Par.MinInitStateRadius = 0.25;              % Nearest a target may be initialised to the origin
+Par.MaxInitStateRadius = 0.35;              % Farthest a target may be initialised to the origin
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Target dynamic model parameters                                     %%%

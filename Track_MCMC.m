@@ -25,6 +25,7 @@ else
             track = Templates.Track;
             track.birth = 0; track.death = 1; track.num = 1;
             track.state{1} = InitState{j};
+            track.smooth{1} = InitState{j};
             track.covar{1} = Par.KFInitVar*eye(4);
             track.assoc = 0;
             
@@ -50,12 +51,10 @@ for t = 1:Par.T
     if t==1
         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, t, {InitChain}, InitEst, Observs);
     else
-        %         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, min(t,Par.L), Chains(1:t), BestEsts{max(1,t-Par.S)}.Copy, Observs);
         [Chains{t}, BestEsts{t}, MoveTypes{t}] = MCMCFrame(t, min(t,Par.L), Chains(1:t), BestEsts{t-1}, Observs);
     end
     
-    Results{t}.particles = Chains{t}.particles;
-    Results{t}.posteriors = Chains{t}.posteriors;
+    Results{t} = Chains{t};
     
     disp(['*** Correct associations at frame ' num2str(t-min(t,Par.L)+1) ': ' num2str(detections(t-min(t,Par.L)+1,:))]);
     assoc = [];
@@ -73,25 +72,25 @@ for t = 1:Par.T
     
 end
 
-% Kalman smooth the states
-if Par.FLAG_RB
-    for t = 1:Par.T
-        for ii = 1:Par.NumIt
-            for j = 1:Par.NumTgts
-                last = min(t, Chains{t}.particles{ii}.tracks(j).death - 1);
-                first = max(1, Chains{t}.particles{ii}.tracks(j).birth+1);
-                num = last - first + 1;
-                Obs = ListAssocObservs(last, num, Chains{t}.particles{ii}.tracks(j), Observs);
-                init_state = Chains{t}.particles{ii}.tracks(j).state{first-1 -Chains{t}.particles{ii}.tracks(j).birth+1};
-                init_var = Par.KFInitVar*eye(4);
-                [ Mean, Var ] = KalmanSmoother( Obs, init_state, init_var );
-                Chains{t}.particles{ii}.tracks(j).state(first -Chains{t}.particles{ii}.tracks(j).birth+1:last -Chains{t}.particles{ii}.tracks(j).birth+1) = Mean;
-            end
-        end
-        Results{t}.particles = Chains{t}.particles;
-        Results{t}.posteriors = Chains{t}.posteriors;
-    end
-end
+% % Kalman smooth the states
+% if Par.FLAG_RB
+%     for t = 1:Par.T
+%         for ii = 1:Par.NumIt
+%             for j = 1:Par.NumTgts
+%                 last = min(t, Chains{t}.particles{ii}.tracks(j).death - 1);
+%                 first = max(1, Chains{t}.particles{ii}.tracks(j).birth+1);
+%                 num = last - first + 1;
+%                 Obs = ListAssocObservs(last, num, Chains{t}.particles{ii}.tracks(j), Observs);
+%                 init_state = Chains{t}.particles{ii}.tracks(j).state{first-1 -Chains{t}.particles{ii}.tracks(j).birth+1};
+%                 init_var = Par.KFInitVar*eye(4);
+%                 [ Mean, Var ] = KalmanSmoother( Obs, init_state, init_var );
+%                 Chains{t}.particles{ii}.tracks(j).state(first -Chains{t}.particles{ii}.tracks(j).birth+1:last -Chains{t}.particles{ii}.tracks(j).birth+1) = Mean;
+%             end
+%         end
+%         Results{t}.particles = Chains{t}.particles;
+%         Results{t}.posteriors = Chains{t}.posteriors;
+%     end
+% end
 
 end
 
@@ -130,6 +129,7 @@ for j = 1:PrevBest.N
         PrevBest.tracks(j).death = PrevBest.tracks(j).death + 1;
         PrevBest.tracks(j).num = PrevBest.tracks(j).num + 1;
         PrevBest.tracks(j).state = [PrevBest.tracks(j).state; {state}];
+        PrevBest.tracks(j).smooth = [PrevBest.tracks(j).smooth; {state}];
         PrevBest.tracks(j).covar = [PrevBest.tracks(j).covar; {covar}];
         PrevBest.tracks(j).assoc = [PrevBest.tracks(j).assoc; 0];
     end
@@ -181,6 +181,7 @@ for ii = 2:Par.NumIt
                 Old.tracks(j).death = Old.tracks(j).death + 1;
                 Old.tracks(j).num = Old.tracks(j).num + 1;
                 Old.tracks(j).state = [Old.tracks(j).state; {state}];
+                Old.tracks(j).smooth = [Old.tracks(j).smooth; {state}];
                 Old.tracks(j).covar = [Old.tracks(j).covar; {covar}];
                 Old.tracks(j).assoc = [Old.tracks(j).assoc; 0];
             end
@@ -245,6 +246,7 @@ for ii = 2:Par.NumIt
             
             % Extend track up to time t with blanks
             New.tracks(j).state = [New.tracks(j).state; repmat({zeros(4,1)}, sn, 1)];
+            New.tracks(j).smooth = [New.tracks(j).smooth; repmat({zeros(4,1)}, sn, 1)];
             New.tracks(j).covar = [New.tracks(j).covar; repmat({zeros(4,4)}, sn, 1)];
             New.tracks(j).assoc = [New.tracks(j).assoc; zeros(sn, 1)];
             New.tracks(j).death = t+1;
@@ -273,6 +275,7 @@ for ii = 2:Par.NumIt
             ori_cut_pt = t-L - NewOrigin.tracks(j).birth + 1;
             des_cut_pt = t-L - New.tracks(j).birth + 1;
             New.tracks(j).state = [NewOrigin.tracks(j).state(1:ori_cut_pt); New.tracks(j).state(des_cut_pt+1:end)];
+            New.tracks(j).smooth = [NewOrigin.tracks(j).smooth(1:ori_cut_pt); New.tracks(j).smooth(des_cut_pt+1:end)];
             New.tracks(j).assoc = [NewOrigin.tracks(j).assoc(1:ori_cut_pt); New.tracks(j).assoc(des_cut_pt+1:end)];
             New.tracks(j).birth = NewOrigin.tracks(j).birth;
             New.tracks(j).num = New.tracks(j).death - New.tracks(j).birth;
@@ -321,6 +324,19 @@ for ii = 2:Par.NumIt
     if new_post==-inf, ap = -inf; end
     
     if log(rand) < ap
+        
+        % If RB, smooth state
+        if Par.FLAG_RB
+            last = min(t, New.tracks(j).death - 1);
+            first = max(1, New.tracks(j).birth+1);
+            num = last - first + 1;
+            Obs = ListAssocObservs(last, num, New.tracks(j), Observs);
+            init_state = New.tracks(j).state{1 -New.tracks(j).birth+1};
+            init_var = Par.KFInitVar*eye(4);
+            [Mean, ~] = KalmanSmoother(Obs, init_state, init_var);
+            New.tracks(j).smooth(first -New.tracks(j).birth+1:last -New.tracks(j).birth+1) = Mean;
+        end
+     
         MC.particles{ii} = New;
         MC.posteriors(ii,j) = new_post;
         accept(type) = accept(type) + 1;
@@ -332,7 +348,7 @@ for ii = 2:Par.NumIt
         if type==1
             d_accept(d) = d_accept(d) + 1;
         end
-        
+   
     else
         MC.particles{ii} = Old;
         MC.posteriors(ii,j) = old_post;

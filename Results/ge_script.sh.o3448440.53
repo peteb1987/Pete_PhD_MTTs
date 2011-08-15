@@ -1,0 +1,206 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2010 The MathWorks, Inc.
+                Version 7.11.0.584 (R2010b) 64-bit (glnxa64)
+                              August 16, 2010
+
+ 
+  To get started, type one of these: helpwin, helpdesk, or demo.
+  For product information, visit www.mathworks.com.
+ 
+
+test_flag =
+
+    53
+
+**************************************************************
+*** Now processing frame 1
+*** Target Cluster1: Effective Sample Size = 460.5227
+*** Target Cluster2: Effective Sample Size = 459.7397
+*** Target Cluster3: Effective Sample Size = 450.0947
+*** Target Cluster4: Effective Sample Size = 466.4151
+*** Target Cluster5: Effective Sample Size = 463.7877
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** Frame 1 processed in 6.999 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 2
+*** Target Cluster1: Effective Sample Size = 403.5232
+*** Target Cluster2: Effective Sample Size = 410.5483
+*** Target Cluster3: Effective Sample Size = 371.6816
+*** Target Cluster4: Effective Sample Size = 429.0013
+*** Target Cluster5: Effective Sample Size = 458.4099
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** Frame 2 processed in 12.3223 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 3
+*** Target Cluster1: Effective Sample Size = 357.6835
+*** Target Cluster2: Effective Sample Size = 246.0718
+*** Target Cluster3: Effective Sample Size = 171.5434
+*** Target Cluster4: Effective Sample Size = 230.7185
+*** Target Cluster5: Effective Sample Size = 444.9584
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** Frame 3 processed in 19.9536 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 4
+*** Target Cluster1: Effective Sample Size = 330.3641
+*** Target Cluster2: Effective Sample Size = 331.3585
+*** Target Cluster3: Effective Sample Size = 172.4797
+*** Target Cluster4: Effective Sample Size = 44.6594. RESAMPLED (Conservative). ESS = 312.9441
+*** Target Cluster5: Effective Sample Size = 170.394
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** Frame 4 processed in 29.5156 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 5
+*** Target Cluster1: Effective Sample Size = 207.7303
+*** Target Cluster2: Effective Sample Size = 123.5714
+*** Target Cluster3: Effective Sample Size = 22.6745. RESAMPLED (Conservative). ESS = 349.1687
+*** Target Cluster4: Effective Sample Size = 5.9698. RESAMPLED (Conservative). ESS = 330.3976
+*** Target Cluster5: Effective Sample Size = 80.1111
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** Frame 5 processed in 44.0648 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 6
+*** Target Cluster1: Effective Sample Size = 34.8336. RESAMPLED (Conservative). ESS = 383.6809
+*** Target Cluster2: Effective Sample Size = 53.2715
+*** Target Cluster3: Effective Sample Size = 5.7992. RESAMPLED (Conservative). ESS = 434.6046
+*** Target Cluster4: Effective Sample Size = 6.1179. RESAMPLED (Conservative). ESS = 385.1561
+*** Target Cluster5: Effective Sample Size = 64.885
+*** Correct associations at frame 2: 0  1  2  3  4
+*** Modal associations at frame 2: 0  1  2  3  4
+*** Frame 6 processed in 55.6691 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 7
+*** Target Cluster1: Effective Sample Size = 12.7083. RESAMPLED (Conservative). ESS = 377.7617
+*** Target Cluster2: Effective Sample Size = 49.3133. RESAMPLED (Conservative). ESS = 349.0816
+*** Target Cluster3: Effective Sample Size = 1.0049. RESAMPLED (Conservative). ESS = 497.9566
+*** Target Cluster4: Effective Sample Size = 5.2853. RESAMPLED (Conservative). ESS = 413.8029
+*** Target Cluster5: Effective Sample Size = 3.394. RESAMPLED (Conservative). ESS = 315.0006
+*** Correct associations at frame 3: 1  2  3  4  5
+*** Modal associations at frame 3: 1  2  3  0  5
+*** Frame 7 processed in 64.4165 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 8
+*** Target Cluster1: Effective Sample Size = 4.6551. RESAMPLED (Conservative). ESS = 312.3257
+*** Target Cluster2: Effective Sample Size = 19.8675. RESAMPLED (Conservative). ESS = 324.5271
+*** Target Cluster3: Effective Sample Size = 1. RESAMPLED (Conservative). ESS = 500
+*** Target Cluster4: Effective Sample Size = 2.8296. RESAMPLED (Conservative). ESS = 475.8727
+*** Target Cluster5: Effective Sample Size = 7.0209. RESAMPLED (Conservative). ESS = 293.5621
+*** Correct associations at frame 4: 1  2  3  4  5
+*** Modal associations at frame 4: 1   2   0   0  63
+*** Frame 8 processed in 66.6808 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 9
+*** Target Cluster1: Effective Sample Size = 4.2987. RESAMPLED (Conservative). ESS = 430.5773
+*** Target Cluster2: Effective Sample Size = 61.6342
+*** Target Cluster3: Effective Sample Size = 1.3795. RESAMPLED (Conservative). ESS = 463.8487
+*** Target Cluster4: Effective Sample Size = 15.1912. RESAMPLED (Conservative). ESS = 480.0575
+*** Target Cluster5: Effective Sample Size = 1.1574. RESAMPLED (Conservative). ESS = 315.7975
+*** Correct associations at frame 5: 1  2  3  4  5
+*** Modal associations at frame 5: 1    2    3  170   78
+*** Frame 9 processed in 85.4626 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 10
+*** Target Cluster1: Effective Sample Size = 1.0021. RESAMPLED (Conservative). ESS = 470.0044
+*** Target Cluster2: Effective Sample Size = 73.2779
+*** Target Cluster3: Effective Sample Size = 1. RESAMPLED (Conservative). ESS = 498
+*** Target Cluster4: Effective Sample Size = 6.8947. RESAMPLED (Conservative). ESS = 486.6806
+*** Target Cluster5: Effective Sample Size = 1.1638. RESAMPLED (Conservative). ESS = 424.9942
+*** Correct associations at frame 6: 1  2  3  0  4
+*** Modal associations at frame 6: 0    2  103    3    4
+*** Frame 10 processed in 64.254 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 11
+*** Target Cluster1: Effective Sample Size = 2.8352. RESAMPLED (Conservative). ESS = 467.2796
+*** Target Cluster2: Effective Sample Size = 39.1533. RESAMPLED (Conservative). ESS = 402.5062
+*** Target Cluster3: Effective Sample Size = 6.0034. RESAMPLED (Conservative). ESS = 402.6551
+*** Target Cluster4: Effective Sample Size = 39.7603. RESAMPLED (Conservative). ESS = 369.5082
+*** Target Cluster5: Effective Sample Size = 18.9935. RESAMPLED (Conservative). ESS = 345.5463
+*** Correct associations at frame 7: 1  2  3  4  5
+*** Modal associations at frame 7: 1    2  206  211    5
+*** Frame 11 processed in 66.5786 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 12
+*** Target Cluster1: Effective Sample Size = 6.2149. RESAMPLED (Conservative). ESS = 408.4133
+*** Target Cluster2: Effective Sample Size = 77.3746
+*** Target Cluster3: Effective Sample Size = 3.9045. RESAMPLED (Conservative). ESS = 414.3633
+*** Target Cluster4: Effective Sample Size = 18.0338. RESAMPLED (Conservative). ESS = 428.2627
+*** Target Cluster5: Effective Sample Size = 3.6101. RESAMPLED (Conservative). ESS = 444.6951
+*** Correct associations at frame 8: 1  2  3  4  5
+*** Modal associations at frame 8: 1  2  0  3  5
+*** Frame 12 processed in 66.1952 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 13
+*** Target Cluster1: Effective Sample Size = 10.3143. RESAMPLED (Conservative). ESS = 458.6729
+*** Target Cluster2: Effective Sample Size = 118.7613
+*** Target Cluster3: Effective Sample Size = 3.9401. RESAMPLED (Conservative). ESS = 387.1655
+*** Target Cluster4: Effective Sample Size = 13.5779. RESAMPLED (Conservative). ESS = 422.4366
+*** Target Cluster5: Effective Sample Size = 2.3417. RESAMPLED (Conservative). ESS = 458.6692
+*** Correct associations at frame 9: 1  2  3  4  5
+*** Modal associations at frame 9: 1   2  32   3   5
+*** Frame 13 processed in 71.4639 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 14
+*** Target Cluster1: Effective Sample Size = 13.7332. RESAMPLED (Conservative). ESS = 492.7491
+*** Target Cluster2: Effective Sample Size = 50.1602
+*** Target Cluster3: Effective Sample Size = 28.4704. RESAMPLED (Conservative). ESS = 331.4698
+*** Target Cluster4: Effective Sample Size = 75.0132
+*** Target Cluster5: Effective Sample Size = 1.0241. RESAMPLED (Conservative). ESS = 435.0952
+*** Correct associations at frame 10: 1  2  3  4  5
+*** Modal associations at frame 10: 0   2  40   3   5
+*** Frame 14 processed in 62.2538 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 15
+*** Target Cluster1: Effective Sample Size = 52.4408
+*** Target Cluster2: Effective Sample Size = 22.8524. RESAMPLED (Conservative). ESS = 348.6561
+*** Target Cluster3: Effective Sample Size = 2.8805. RESAMPLED (Conservative). ESS = 349.442
+*** Target Cluster4: Effective Sample Size = 110.1999
+*** Target Cluster5: Effective Sample Size = 34.3313. RESAMPLED (Conservative). ESS = 449.2554
+*** Correct associations at frame 11: 1  2  3  4  5
+*** Modal associations at frame 11: 1    2  119    3    5
+*** Frame 15 processed in 62.2848 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 16
+*** Target Cluster1: Effective Sample Size = 20.6514. RESAMPLED (Conservative). ESS = 308.0792
+*** Target Cluster2: Effective Sample Size = 38.0913. RESAMPLED (Conservative). ESS = 330.3854
+*** Target Cluster3: Effective Sample Size = 1.8621. RESAMPLED (Conservative). ESS = 373.155
+*** Target Cluster4: Effective Sample Size = 11.6767. RESAMPLED (Conservative). ESS = 476.724
+*** Target Cluster5: Effective Sample Size = 36.6265. RESAMPLED (Conservative). ESS = 360.0233
+*** Correct associations at frame 12: 1  2  3  4  5
+*** Modal associations at frame 12: 1    2  145    3    5
+*** Frame 16 processed in 60.4934 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 17
+*** Target Cluster1: Effective Sample Size = 13.0425. RESAMPLED (Conservative). ESS = 372.7695
+*** Target Cluster2: Effective Sample Size = 50.0037
+*** Target Cluster3: Effective Sample Size = 1.0027. RESAMPLED (Conservative). ESS = 498.134
+*** Target Cluster4: Effective Sample Size = 8.177. RESAMPLED (Conservative). ESS = 465.7916
+*** Target Cluster5: Effective Sample Size = 65.5153
+*** Correct associations at frame 13: 1  2  3  4  5
+*** Modal associations at frame 13: 1   2  22   3   5
+*** Frame 17 processed in 62.5544 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 18
+*** Target Cluster1: Effective Sample Size = 27.1826. RESAMPLED (Conservative). ESS = 335.3909
+*** Target Cluster2: Effective Sample Size = 58.9826

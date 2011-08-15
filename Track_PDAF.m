@@ -66,7 +66,7 @@ Est = PrevEst;
 for j = 1:Est.N
     if t == Est.tracks(j).death
         state = Par.A * Est.tracks(j).state{t-1-Est.tracks(j).birth+1};
-        covar = Par.A * Est.tracks(j).covar{t-1-Est.tracks(j).birth+1} * Par.A + Par.Q;
+        covar = Par.A * Est.tracks(j).covar{t-1-Est.tracks(j).birth+1} * Par.A' + Par.Q;
         Est.tracks(j).death = Est.tracks(j).death + 1;
         Est.tracks(j).num = Est.tracks(j).num + 1;
         Est.tracks(j).state = [Est.tracks(j).state; {state}];
@@ -121,7 +121,7 @@ for j = 1:Par.NumTgts
     
     % Calculate association posteriors and thus total innovation
 	assocs = Par.PDetect * mvnpdf(gated_innov', [0 0], S);
-    assoc_clut = Par.ClutDens * (1-Par.PDetect) / Par.PDetect;
+    assoc_clut = (1-Par.PDetect)*Par.ExpClutObs*Par.ClutDens;
     norm_const = sum(assocs) + assoc_clut;
     assocs = assocs / norm_const;
     assoc_clut = assoc_clut / norm_const;
@@ -134,15 +134,15 @@ for j = 1:Par.NumTgts
     % Calculate covariance estimate
     weighted_variance = zeros(2, 2, N_gated);
     for i = 1:N_gated
-        weighted_variance(:,:,i) = assocs(i) * gated_innov(:, i)' * gated_innov(:, i);
+        weighted_variance(:,:,i) = assocs(i) * gated_innov(:, i) * gated_innov(:, i)';
     end
-    middle_bit = sum(weighted_variance, 3) - tot_innov'*tot_innov;
+    middle_bit = sum(weighted_variance, 3) - tot_innov*tot_innov';
     est_covar = assoc_clut*pred_covar + (1-assoc_clut)*(pred_covar-W*S*W') + W*middle_bit*W';
     
     % Update track
     Est.tracks(j).state{t -Est.tracks(j).birth+1} = est_mean;
     Est.tracks(j).covar{t -Est.tracks(j).birth+1} = est_covar;
-    
+
 end
 
 end

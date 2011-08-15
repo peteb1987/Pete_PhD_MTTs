@@ -9,7 +9,7 @@ obs = struct('r', [], 'N', []);             % r is an array of observations (one
 Templates.Observs = repmat(obs, Par.T, 1);
 
 % Track
-Templates.Track = struct('num', [], 'birth', [], 'death', [], 'state', [], 'assoc', [], 'covar', []);
+Templates.Track = struct('num', [], 'birth', [], 'death', [], 'state', [], 'assoc', [], 'covar', [], 'smooth', []);
                 % num is the number of frames for which the track lasts.
                 % birth is the first frame in which the track appears
                 % death is the first frame in which the track disappears

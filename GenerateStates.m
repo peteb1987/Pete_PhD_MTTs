@@ -34,14 +34,14 @@ for j = 1:N
     TrueTracks{j}.assoc = zeros(TrueTracks{j}.num, 1);
     
     % Randomly generate initial state
-    if Par.FLAG_ObsMod == 0
-        TrueTracks{j}.state{1}(1:2) = unifrnd(-Par.MaxInitStateDist*Par.Xmax, Par.MaxInitStateDist*Par.Xmax, [2,1]);
-    elseif Par.FLAG_ObsMod == 1
+%     if Par.FLAG_ObsMod == 0
+%         TrueTracks{j}.state{1}(1:2) = unifrnd(-Par.MaxInitStateDist*Par.Xmax, Par.MaxInitStateDist*Par.Xmax, [2,1]);
+%     elseif Par.FLAG_ObsMod == 1
          rng = unifrnd(Par.MinInitStateRadius*Par.Xmax, Par.MaxInitStateRadius*Par.Xmax);
          bng = unifrnd(0, 2*pi);
          TrueTracks{j}.state{1}(1) = rng*sin(bng);
          TrueTracks{j}.state{1}(2) = rng*cos(bng);
-    end
+%     end
     TrueTracks{j}.state{1}(3:4) = unifrnd(-Par.Vmax, Par.Vmax, [2,1]);
     
     if Par.FLAG_SetInitStates
