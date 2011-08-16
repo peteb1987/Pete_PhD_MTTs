@@ -1,0 +1,10 @@
+{??? Error using ==> Track_SISR>SISRFrame at 207
+All weights are zero
+
+Error in ==> Track_SISR at 55
+        [PartSets{t}] = SISRFrame(t, min(t,Par.L), PartSets{t-1}, Observs);
+
+Error in ==> Run_GETest at 118
+        [ Results ] = Track_SISR(detections, Observs, InitStates );
+} 
+

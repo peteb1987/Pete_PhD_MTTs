@@ -207,7 +207,7 @@ for j = 1:Par.NumTgts
 %     assert(~all(isinf(weights{j})), 'All weights are zero');
     
     if all(isinf(weights{j}))
-        weights = log(ones(Par.NumPart, 1));
+        weights{j} = log(ones(Par.NumPart, 1));
     end
 
     % Normalise weights
@@ -219,7 +219,11 @@ for j = 1:Par.NumTgts
     
     % Calculate effective sample size for diagnostics
     ESS_pre(j) = CalcESS(weights{j});
-    assert(~isnan(ESS_pre(j)), 'Effective Sample Size is non defined (probably all weights negligible)');
+%     assert(~isnan(ESS_pre(j)), 'Effective Sample Size is non defined (probably all weights negligible)');
+    if isnan(ESS_pre(j))
+        weights{j} = log(ones(Par.NumPart, 1));
+        ESS_pre(j) = CalcESS(weights{j});
+    end
     
     if (ESS_pre(j) < Par.ResamThresh*Par.NumPart)
         [PartSet] = ConservativeResample(j, PartSet, weights{j});

@@ -1,0 +1,12 @@
+{??? Cell contents reference from a non-cell array object.
+
+Error in ==> Track_SISR>SISRFrame at 214
+    max_weight = max(weights{j}, [], 1); weights{j} = weights{j} - max_weight;
+
+Error in ==> Track_SISR at 55
+        [PartSets{t}] = SISRFrame(t, min(t,Par.L), PartSets{t-1}, Observs);
+
+Error in ==> Run_GETest at 126
+        [ Results ] = Track_SISR(detections, Observs, InitStates );
+} 
+

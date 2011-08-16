@@ -1,0 +1,27 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2010 The MathWorks, Inc.
+                Version 7.11.0.584 (R2010b) 64-bit (glnxa64)
+                              August 16, 2010
+
+ 
+  To get started, type one of these: helpwin, helpdesk, or demo.
+  For product information, visit www.mathworks.com.
+ 
+
+test_flag =
+
+    38
+
+**************************************************************
+*** Now processing frame 1
+*** Accepted 3855 of 4999 fixed-history single target moves in this frame, which by d values: 3855
+*** Accepted 0 of 0 full single target moves in this frame
+*** Accepted 0 of 0 bridging-history single target moves in this frame
+*** Correct associations at frame 1: 1  2  3  4  5
+*** Modal associations at frame 1: 1  2  3  4  5
+*** MAP associations at frame 1: 1  2  3  4  5
+*** Frame 1 processed in 13.3954 seconds
+**************************************************************
+**************************************************************
+*** Now processing frame 2
