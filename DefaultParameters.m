@@ -12,7 +12,9 @@ Par.rand_seed = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Par.FLAG_AlgType = 0;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
-Par.FLAG_ObsMod = 1;                            % 0 = linear Gaussian
+Par.FLAG_DynMod = 1;                            % 0 = linear Gaussian
+                                                % 1 = intrinsics
+Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
 Par.FLAG_SetInitStates = false;                 % false = generate starting points randomly. true = take starting points from Par.InitStates
@@ -52,17 +54,25 @@ Par.MaxInitStateRadius = 0.35;              % Farthest a target may be initialis
 %%% Target dynamic model parameters                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Par.ProcNoiseVar = 1;                                                      % Gaussian process noise variance (random accelerations)
-Par.A = [1 0 P 0; 0 1 0 P; 0 0 1 0; 0 0 0 1];                              % 2D transition matrix using near CVM model
-Par.B = [P^2/2*eye(2); P*eye(2)];                                          % 2D input transition matrix (used in track generation when we impose a deterministic acceleration)
-Par.Q = Par.ProcNoiseVar * ...
-    [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];          % Gaussian motion covariance matrix (discretised continous random model)
+if Par.FLAG_DynMod == 0
+    Par.ProcNoiseVar = 1;                                                      % Gaussian process noise variance (random accelerations)
+    Par.A = [1 0 P 0; 0 1 0 P; 0 0 1 0; 0 0 0 1];                              % 2D transition matrix using near CVM model
+    Par.B = [P^2/2*eye(2); P*eye(2)];                                          % 2D input transition matrix (used in track generation when we impose a deterministic acceleration)
+    Par.Q = Par.ProcNoiseVar * ...
+        [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];          % Gaussian motion covariance matrix (discretised continous random model)
+    Par.Qchol = chol(Par.Q);                                                   % Cholesky decompostion of Par.Q
+elseif Par.FLAG_DynMod == 1
+    Par.B = zeros(4,2);
+    Par.TangentNoiseVar = 10;
+    Par.NormalNoiseVar = 0.1;
+    Par.Q_pre = [Par.TangentNoiseVar, 0; 0, Par.NormalNoiseVar];           % Noise variance matrix of accelerations. Must be weighted by noise jacobian before use as Q.
+end
 Par.ExpBirth = 0.1;                                                        % Expected number of new targets in a frame (poisson deistributed)
 Par.PDeath = 0.01;                                                          % Probability of a (given) target death in a frame
 if ~Par.FLAG_TargetsDie, Par.PDeath = 0; end
 if ~Par.FLAG_TargetsBorn, Par.ExpBirth = 0; end
 
-Par.Qchol = chol(Par.Q);                                                   % Cholesky decompostion of Par.Q
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Observation model parameters                                        %%%

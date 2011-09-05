@@ -5,7 +5,7 @@ clup
 dbstop if error
 
 % How many tests?
-num_tests = 1;
+num_tests = 10;
 
 Stats = struct('MMSE', zeros(num_tests,1), 'LostTracks', zeros(num_tests,1));
 
@@ -22,7 +22,7 @@ for c = 1:num_tests
     %%% Set test-specific parameters                                    %%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    Par.FLAG_AlgType = 2;
+    Par.FLAG_AlgType = 4;
 %     Par.L = 1;
 %     Par.S = 5;
     
@@ -55,20 +55,22 @@ for c = 1:num_tests
         [ Results ] = Track_PDAF(detections, Observs, InitStates );
     elseif Par.FLAG_AlgType == 3
         [ Results ] = Track_JPDAF(detections, Observs, InitStates );
+    elseif Par.FLAG_AlgType == 4
+        [ Results ] = Track_MCMC_IS(detections, Observs, InitStates );
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%% Plot and analyse                                                %%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1)
+    if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1) || (Par.FLAG_AlgType == 4)
         PlotParticles(Results{Par.T}.particles, state_fig);
         [ assoc ] = RetrieveAssocs( Par.T, Results{Par.T}.particles );
     elseif (Par.FLAG_AlgType == 2) || (Par.FLAG_AlgType == 3)
         PlotParticles(Results(Par.T), state_fig);
     end
     
-    if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1)
+    if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1) || (Par.FLAG_AlgType == 4)
         [Stats.RMSE_MMSE(c), Stats.RMSE_MAP(c), Stats.prop_ass(c), Stats.num_lost(c)] = BasicParticleAnalysis(TrueTracks, Results);
         Stats.RMSE_MMSE(isnan(Stats.RMSE_MMSE))=0;
         total_RMSE = sqrt( sum(Stats.RMSE_MMSE.^2 .* (Par.NumTgts - Stats.num_lost))/sum(Par.NumTgts - Stats.num_lost) );
