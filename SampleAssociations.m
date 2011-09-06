@@ -9,11 +9,15 @@ frame_prob = zeros(L, 1);
 
 % Set some local matrixes
 R = Par.R;
-Q = Par.Q;
 invR = inv(Par.R);
-invQ = inv(Par.Q);
-A = Par.A;
-
+if Par.FLAG_DynMod == 0
+    A = Par.A;
+    Q = Par.Q;
+elseif Par.FLAG_DynMod == 1
+    A = zeros(4);
+    Q = zeros(4);
+end
+    
 % Get t-L state and var
 if ~Par.FLAG_RB
     x = Set.tracks(j).state{t-L-Set.tracks(j).birth+1};
@@ -36,17 +40,25 @@ for tt = t+1:Set.tracks(j).death-1
         d = tt - t;
         
         % Calculate required quantities for this point
-        next_y = Observs(tt).r(ass, :)';
-        if Par.FLAG_ObsMod == 0
-            
-        elseif Par.FLAG_ObsMod == 1
+        y_next = Observs(tt).r(ass, :)';
+        if Par.FLAG_DynMod == 0
             p_x = (A^k) * x;
+        else
+            p_x = x;
+            for kk=1:k
+                p_x = IntrinsicDynamicPredict(p_x);
+            end
+        end
+        p_x_next = p_x;
+        
+        if Par.FLAG_ObsMod == 0
+            C_next = Par.C;
+            p_y_next = C_next * p_x_next;
+        elseif Par.FLAG_ObsMod == 1
             [p_bng, p_rng] = cart2pol(p_x(1), p_x(2));
             p_rngsq = p_rng^2;
-            J = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
-            next_p_pol = [p_bng; p_rng];
-            next_p_x = p_x;
-            next_J = J;
+            C_next = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+            p_y_next = [p_bng; p_rng];
         end
         
     end
@@ -72,53 +84,64 @@ for tt = last:-1:t-L+1
         end
     end
     
-    % Calculate deterministic prediction and jacobian
-    p_x = (A^k) * x;
+    % Calculate deterministic prediction
+    if Par.FLAG_DynMod == 0
+        p_x = (A^k) * x;
+    else
+        p_x = x;
+        for kk=1:k
+            p_x = IntrinsicDynamicPredict(p_x);
+        end
+    end
+    
+    % Calculate observation model jacobian
     if Par.FLAG_ObsMod == 0
         C = [1 0 0 0; 0 1 0 0];
+        p_y = C*p_x;
     elseif Par.FLAG_ObsMod == 1
         [p_bng, p_rng] = cart2pol(p_x(1), p_x(2));
+        p_y = [p_bng; p_rng];
         p_rngsq = p_rng^2;
-        J = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+        C = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+    end
+    
+    % At this stage we should have p_x, p_y, and C calculated, the
+    % predicted state, observation and linear observation matrix. Also the
+    % same three suffixed by _next which give the same values d steps
+    % forward, and y_next.
+    
+    Q_before = (A^k)*init_var*(A^k)';
+    for kk = 0:k-1
+        Q_before = Q_before + (A^kk)*Q*(A^kk)';
     end
     
     % Calculate the mean and variance
-    if Par.FLAG_ObsMod == 0
-        if d>L
-            mu = C*p_x;
-            S = R + C*(A^k)*init_var*(A^k)'*C';
-            for kk = 0:k-1
-                S = S + C*(A^kk)*Q*(A^kk)'*C';
-            end
-        else
-            xV = (A^k)*init_var*(A^k)';
-            for kk = 0:k-1
-                xV = xV + (A^kk)*Q*(A^kk)';
-            end
-            yV = R + C*xV*C';
-            invSig = C'*(R\C) + ((A^d)'*C'/yV)*C*(A^d) + inv(xV);
-            invS = invR - ((R\C)/invSig)*C'/R;
-            S = inv(invS);
-            mu = invS \ ( (((R\C)*(invSig\(A^d)')*C'/yV)*next_y) + (((R\(C/invSig))/xV)*(A^k)*x) );
+    if d > L
+        % No known later observations
+        mu = p_y;
+        S = R + C*Q_before*C';
+%         S = R + C*(A^k)*init_var*(A^k)'*C';
+%         for kk = 0:k-1
+%             S = S + C*(A^kk)*Q*(A^kk)'*C';
+%         end
+    else
+        % Known later observation
+        A_after = A^d;
+        Q_after = zeros(4);
+        for dd = 0:d
+            Q_after = Q_after + (A^dd)*Q*(A^dd)';
         end
-    elseif Par.FLAG_ObsMod == 1
-        if d>L
-            mu = [p_bng; p_rng];
-            S = R + J*(A^k)*init_var*(A^k)'*J';
-            for kk = 0:k-1
-                S = S + J*(A^kk)*Q*(A^kk)'*J';
-            end
-        else
-            xV = (A^k)*init_var*(A^k)';
-            for kk = 0:k-1
-                xV = xV + (A^kk)*Q*(A^kk)';
-            end
-            yV = R + next_J * xV * next_J';
-            invSig = J'*(R\J) + ((A^d)'*next_J'/yV)*next_J*(A^d) + inv(xV);
-            invS = invR - ((R\J)/invSig)*J'/R;
-            S = inv(invS);
-            mu = [p_bng; p_rng] - J*p_x + invS \ ( (((R\J)*(invSig\(A^d)')*next_J'/yV)*(next_y-next_p_pol+next_J*next_p_x)) + (((R\(J/invSig))/xV)*(A^k)*x) );
-        end
+        R_after = R + C_next*Q_after*C_next';
+        invSigma = C'*(R\C) + (A_after'*C_next'/R_after)*C_next*A_after + inv(Q_before);
+        invS = invR - ((R\C)/invSigma)*C'/R;
+        S = inv(invS);
+        mu = p_y - C*p_x + (invS\(R\C)/invSigma)*( A_after'*(C_next'/R_after)*(y_next-p_y_next+C_next*p_x_next) + Q_before\p_x );
+        
+%         yV = R + C_next * xV * C_next';
+%         invSig = C'*(R\C) + ((A^d)'*C_next'/yV)*C_next*(A^d) + inv(xV);
+%         invS = invR - ((R\C)/invSig)*C'/R;
+%         S = inv(invS);
+%         mu = p_y - C*p_x + invS \ ( (((R\C)*(invSig\(A^d)')*C_next'/yV)*(y_next-p_y_next+C_next*p_x_next)) + (((R\(C/invSig))/xV)*(A^k)*x) );
     end
     
     S = (S+S')/2;
@@ -198,15 +221,11 @@ for tt = last:-1:t-L+1
     if ass==0
         d=d+1;
     else
-        next_y = Observs(tt).r(ass, :)';
         d=1;
-        if Par.FLAG_ObsMod == 0
-            
-        elseif Par.FLAG_ObsMod == 1
-            next_p_pol = [p_bng; p_rng];
-            next_p_x = p_x;
-            next_J = J;
-        end
+        y_next = Observs(tt).r(ass, :)';
+        p_y_next = p_y;
+        p_x_next = p_x;
+        C_next = C;
     end
     
 end

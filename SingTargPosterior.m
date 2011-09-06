@@ -60,6 +60,8 @@ for tt = start_time:end_time
                 
             else
                 
+                %%% THIS BIT NEEDS ADAPTING FOR NEW INTRINSIC DYNAMIC MODEL %%%
+                
                 % Calculate predictive likelihood using Rao-Blackwellisation
                 if Par.FLAG_ObsMod == 0
                     C = [1 0 0 0; 0 1 0 0];
@@ -90,8 +92,14 @@ for tt = start_time:end_time
             trans(k) = trans(k) + log(Par.UnifPosDens*Par.UnifVelDens);
         else
             prev_state = Set.tracks(j).state{tt-1 -Set.tracks(j).birth+1};
-            trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
-            % trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdf(state', (Par.A * prev_state)', Par.Q) );
+            
+            if Par.FLAG_DynMod == 0
+                trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
+            elseif Par.FLAG_DynMod == 1
+                aT = (state(4)-prev_state(4))/Par.P;
+                aP = aT*(state(3)-prev_state(3))/log(state(4)/prev_state(4));
+                trans(k) = trans(k) + mvnpdfQ([aT, aP], [0 0]);
+            end
         end
         
         % See if it's died

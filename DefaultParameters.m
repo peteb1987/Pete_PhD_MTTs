@@ -12,7 +12,7 @@ Par.rand_seed = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Par.FLAG_AlgType = 0;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
-Par.FLAG_DynMod = 1;                            % 0 = linear Gaussian
+Par.FLAG_DynMod = 0;                            % 0 = linear Gaussian
                                                 % 1 = intrinsics
 Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
@@ -63,9 +63,10 @@ if Par.FLAG_DynMod == 0
     Par.Qchol = chol(Par.Q);                                                   % Cholesky decompostion of Par.Q
 elseif Par.FLAG_DynMod == 1
     Par.B = zeros(4,2);
-    Par.TangentNoiseVar = 10;
+    Par.TangentNoiseVar = 0.1;
     Par.NormalNoiseVar = 0.1;
     Par.Q_pre = [Par.TangentNoiseVar, 0; 0, Par.NormalNoiseVar];           % Noise variance matrix of accelerations. Must be weighted by noise jacobian before use as Q.
+    Par.Qchol = chol(Par.Q_pre);
 end
 Par.ExpBirth = 0.1;                                                        % Expected number of new targets in a frame (poisson deistributed)
 Par.PDeath = 0.01;                                                          % Probability of a (given) target death in a frame
@@ -112,3 +113,6 @@ Par.S = Par.L;                          % Max distance previously from which par
 Par.BridgeLength = 1;                   % Length of bridge for bridging-history proposals.
 Par.Restart = 10000;                    % Restart after this many iterations
 Par.BurnIn = floor(0.1*Par.NumIt);      % Length of burn-in
+
+%%% For MCMC-IS %%%
+Par.HistoryAcceptScaling = 0.75;

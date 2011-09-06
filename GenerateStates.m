@@ -34,15 +34,21 @@ for j = 1:N
     TrueTracks{j}.assoc = zeros(TrueTracks{j}.num, 1);
     
     % Randomly generate initial state
-%     if Par.FLAG_ObsMod == 0
-%         TrueTracks{j}.state{1}(1:2) = unifrnd(-Par.MaxInitStateDist*Par.Xmax, Par.MaxInitStateDist*Par.Xmax, [2,1]);
-%     elseif Par.FLAG_ObsMod == 1
-         rng = unifrnd(Par.MinInitStateRadius*Par.Xmax, Par.MaxInitStateRadius*Par.Xmax);
-         bng = unifrnd(0, 2*pi);
-         TrueTracks{j}.state{1}(1) = rng*sin(bng);
-         TrueTracks{j}.state{1}(2) = rng*cos(bng);
-%     end
-    TrueTracks{j}.state{1}(3:4) = unifrnd(-Par.Vmax, Par.Vmax, [2,1]);
+    %     if Par.FLAG_ObsMod == 0
+    %         TrueTracks{j}.state{1}(1:2) = unifrnd(-Par.MaxInitStateDist*Par.Xmax, Par.MaxInitStateDist*Par.Xmax, [2,1]);
+    %     elseif Par.FLAG_ObsMod == 1
+    rng = unifrnd(Par.MinInitStateRadius*Par.Xmax, Par.MaxInitStateRadius*Par.Xmax);
+    bng = unifrnd(0, 2*pi);
+    TrueTracks{j}.state{1}(1) = rng*sin(bng);
+    TrueTracks{j}.state{1}(2) = rng*cos(bng);
+    %     end
+    
+    if Par.FLAG_DynMod == 0
+        TrueTracks{j}.state{1}(3:4) = unifrnd(-Par.Vmax, Par.Vmax, [2,1]);
+    elseif Par.FLAG_DynMod == 1
+        TrueTracks{j}.state{1}(3) = unifrnd(1, 2*pi);
+        TrueTracks{j}.state{1}(4) = unifrnd(0, Par.Vmax);
+    end
     
     if Par.FLAG_SetInitStates
         TrueTracks{j}.state{1} = Par.InitStates{j};
@@ -54,13 +60,15 @@ for j = 1:N
     
     % Loop through frames
     for k = 2:TrueTracks{j}.num
-
-        % Calculate expected state
-        exp_state = Par.A * TrueTracks{j}.state{k-1} + Par.B * Accelerations{j}(k-1, :)';
         
-        % Sample state from Gaussian
-        TrueTracks{j}.state{k} = mvnrnd(exp_state', Par.Q)';
-
+        if Par.FLAG_DynMod == 0
+            
+            % Calculate expected state
+            exp_state = Par.A * TrueTracks{j}.state{k-1} + Par.B * Accelerations{j}(k-1, :)';
+            
+            % Sample state from Gaussian
+            TrueTracks{j}.state{k} = mvnrnd(exp_state', Par.Q)';
+            
 %         % Kill if outside scene
 %         if (Par.FLAG_ObsMod==0) && any(abs( TrueTracks{j}.state{k}(1:2))>Par.Xmax) || ...
 %                 (Par.FLAG_ObsMod==1) && any(sqrt(sum( TrueTracks{j}.state{k}(1:2).^2))>Par.Xmax)
@@ -70,9 +78,17 @@ for j = 1:N
 %             TrueTracks{j}.num = TrueTracks{j}.death - TrueTracks{j}.birth;
 %             break;
 %         end
-        
-        % Limit velocity
-        TrueTracks{j}.state{k}(3:4) = min( max( TrueTracks{j}.state{k}(3:4), -Par.Vmax), Par.Vmax);
+            
+            % Limit velocity
+            TrueTracks{j}.state{k}(3:4) = min( max( TrueTracks{j}.state{k}(3:4), -Par.Vmax), Par.Vmax);
+            
+        elseif Par.FLAG_DynMod == 1
+            
+            acc = mvnrnd([0 0], Par.Q_pre);
+            prev_state = TrueTracks{j}.state{k-1};
+            TrueTracks{j}.state{k} = IntrinsicDynamicEvaluate(prev_state, acc(1), acc(2));
+            
+        end
         
     end
     

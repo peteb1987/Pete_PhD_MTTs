@@ -11,6 +11,15 @@ if Set.tracks(j).death < t-L+1
     return
 end
 
+% Set A and Q depending on model
+if Par.FLAG_DynMod == 0
+    A = Par.A;
+    Q = Par.Q;
+elseif Par.FLAG_DynMod == 1
+    A = zeros(4,4);
+    Q = zeros(4,4);
+end
+
 % How long should the KF run for?
 last = min(t, Set.tracks(j).death - 1);
 first = max(t-L+1, Set.tracks(j).birth+1);
@@ -43,16 +52,23 @@ for k = L:-1:1
     
     tt = t-L+k;
     
+    if (Par.FLAG_DynMod == 1)
+        [A, Q] = IntrinsicDynamicLinearise(state);
+    end
+    
     if (k == L) && (t == Set.tracks(j).death-1)
+        % Sampling last state in track and window
         mu = Mean{L};
         sigma = Var{L};
     elseif (k == L) && (t < Set.tracks(j).death-1)
+        % Sampling last state in window, but not track (e.g. bridging move)
         next_state = Set.tracks(j).state{last+1 -Set.tracks(j).birth+1};
-        sigma = inv(Par.A' * (Par.Q \ Par.A) + inv(Var{k}));
-        mu = sigma * (Par.A' * (Par.Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
+        sigma = inv(A' * (Q \ A) + inv(Var{k}));
+        mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
     else
-        sigma = inv(Par.A' * (Par.Q \ Par.A) + inv(Var{k}));
-        mu = sigma * (Par.A' * (Par.Q \ State{k+1}) + (Var{k} \ Mean{k})); %#ok<MINV>
+        % Sampling state last in neither window or track
+        sigma = inv(A' * (Q \ A) + inv(Var{k}));
+        mu = sigma * (A' * (Q \ State{k+1}) + (Var{k} \ Mean{k})); %#ok<MINV>
     end
     
     sigma = (sigma+sigma')/2;

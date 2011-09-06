@@ -192,7 +192,7 @@ for ii = 2:Par.NumIt
     % Randomly select move type
     if t > Par.L
 %         type_weights = [2 1 1];
-        type_weights = [1 1 0];
+        type_weights = [2 1 0];
     else
         type_weights = [1 0 0];
     end
@@ -313,7 +313,7 @@ for ii = 2:Par.NumIt
     if type == 1
         ap_mod = 0;
     elseif type == 2
-        ap_mod = (0.75) * ap;
+        ap_mod = Par.HistoryAcceptScaling * ap;
     end
     
     ap_store(ii) = ap;
