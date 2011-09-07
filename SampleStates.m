@@ -52,38 +52,88 @@ for k = L:-1:1
     
     tt = t-L+k;
     
-    if (Par.FLAG_DynMod == 1)
-        [A, Q] = IntrinsicDynamicLinearise(state);
-    end
-    
-    if (k == L) && (t == Set.tracks(j).death-1)
-        % Sampling last state in track and window
-        mu = Mean{L};
-        sigma = Var{L};
-    elseif (k == L) && (t < Set.tracks(j).death-1)
+    if (k == L) && (t < Set.tracks(j).death-1)
         % Sampling last state in window, but not track (e.g. bridging move)
         next_state = Set.tracks(j).state{last+1 -Set.tracks(j).birth+1};
-        sigma = inv(A' * (Q \ A) + inv(Var{k}));
-        mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
-    else
+    elseif k<L
         % Sampling state last in neither window or track
-        sigma = inv(A' * (Q \ A) + inv(Var{k}));
-        mu = sigma * (A' * (Q \ State{k+1}) + (Var{k} \ Mean{k})); %#ok<MINV>
+        next_state = State{k+1};
     end
     
-    sigma = (sigma+sigma')/2;
-    
-    if ~no_samp
-        % Sample
-        State{k} = mvnrnd(mu', sigma)';
+    if Par.FLAG_DynMod == 0
         
-    else
-        % Get current value from the track
-        State{k} = Set.tracks(j).state{tt -Set.tracks(j).birth+1};
+        if (k == L) && (t == Set.tracks(j).death-1)
+            % Sampling last state in track and window
+            mu = Mean{L};
+            sigma = Var{L};
+        else
+            % Sampling state last in neither window or track
+            sigma = inv(A' * (Q \ A) + inv(Var{k}));
+            mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
+        end
+        
+        sigma = (sigma+sigma')/2;
+        
+        if ~no_samp
+            % Sample
+            State{k} = mvnrnd(mu', sigma)';
+            
+        else
+            % Get current value from the track
+            State{k} = Set.tracks(j).state{tt -Set.tracks(j).birth+1};
+        end
+        
+        frame_prob(k) = log( mvnpdf(State{k}', mu', sigma) );
+        
+    elseif (Par.FLAG_DynMod == 1)
+        
+        % Calculate A_{tt-1} and Q_{tt}
+        [A, Q] = IntrinsicDynamicLinearise(Mean{k});
+        
+        % Construct Gaussian velocity proposal
+        if (k == L) && (t == Set.tracks(j).death-1)
+            % Sampling last state in track and window
+            mu = Mean{L}(3:4);
+            sigma = Var{L}(3:4,3:4);
+        else
+            % Sampling state last in neither window or track
+            inv_sigma = inv(Q(3:4,3:4)) + inv(Var{k}(3:4,3:4));
+            sigma = inv(inv_sigma);
+            mu = inv_sigma \ ( (Q(3:4,3:4)\next_state(3:4)) + (Var{k}(3:4,3:4)\Mean{k}(3:4)));
+        end
+        
+        if ~no_samp
+            % Sample velocity
+            State{k} = zeros(4,1);
+            State{k}(3:4) = mvnrnd(mu', sigma)';
+            State{k}(4) = max(State{k}(4), 0.1);
+        else
+            % Get current value from the track
+            State{k} = Set.tracks(j).state{tt -Set.tracks(j).birth+1};
+        end
+        
+        % Covariance is degenerate, so the total probability is equal to
+        % that of any two states
+        frame_prob(k) = log( mvnpdf(State{k}(3:4)', mu', sigma) );
+        
     end
     
-    frame_prob(k) = log( mvnpdf(State{k}', mu', sigma) );
     
+end
+
+if Par.FLAG_DynMod && ~no_samp
+    % Calculate deterministic postions
+    prev_state = init_state;
+    for k = 1:L
+        aT = (State{k}(4)-prev_state(4))/Par.P;
+        if aT==0
+            aP = (State{k}(3)-prev_state(3))*prev_state(3)/Par.P;
+        else
+            aP = aT*(State{k}(3)-prev_state(3))/log(State{k}(4)/prev_state(4));
+        end
+        State{k} = IntrinsicDynamicEvaluate(prev_state, aT, aP);
+        prev_state = State{k};
+    end
 end
 
 state_prob = sum(frame_prob);

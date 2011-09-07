@@ -3,6 +3,7 @@
 % Clear the workspace (maintaining breakpoints)
 clup
 dbstop if error
+dbstop if warning
 
 % Set default parameters
 DefaultParameters;
@@ -13,8 +14,8 @@ StructTemplates;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Par.rand_seed = 2;
-Par.T = 20;
-Par.NumTgts = 1;
+% Par.T = 20;
+% Par.NumTgts = 1;
 % Par.FLAG_SetInitStates = true;
 % Par.InitStates = {[0; 200; 2; 0];
 %                   [0; 210; 2; 0];
@@ -34,20 +35,20 @@ Par.NumTgts = 1;
 
 % Par.rand_seed = 2;
 
-Par.FLAG_AlgType = 4;
+Par.FLAG_AlgType = 0;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
-% Par.L = 5;
-% Par.S = 5;
+Par.L = 1;
+Par.S = 1;
 
 % Par.FLAG_RB = true;
-Par.NumIt = 500;
+% Par.NumIt = 500;
 
 % Par.NumTgts = 1;
 % Par.T = 10;
 
-% Par.PDetect = 0.9;
-% Par.ExpClutObs = 200;
+Par.PDetect = 0.9;
+Par.ExpClutObs = 200;
 % Par.ProcNoiseVar = 10;
 % Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
 % if Par.FLAG_ObsMod == 0

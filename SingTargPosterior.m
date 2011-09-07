@@ -97,7 +97,12 @@ for tt = start_time:end_time
                 trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
             elseif Par.FLAG_DynMod == 1
                 aT = (state(4)-prev_state(4))/Par.P;
-                aP = aT*(state(3)-prev_state(3))/log(state(4)/prev_state(4));
+                if aT==0
+                    aP = (state(3)-prev_state(3))*prev_state(3)/Par.P;
+                else
+                    aP = aT*(state(3)-prev_state(3))/log(state(4)/prev_state(4));
+                end
+                assert((~isnan(aP))&&(~isnan(aT)), 'NaN acceleration');
                 trans(k) = trans(k) + mvnpdfQ([aT, aP], [0 0]);
             end
         end

@@ -110,9 +110,14 @@ for tt = last:-1:t-L+1
     % same three suffixed by _next which give the same values d steps
     % forward, and y_next.
     
-    Q_before = (A^k)*init_var*(A^k)';
-    for kk = 0:k-1
-        Q_before = Q_before + (A^kk)*Q*(A^kk)';
+    if Par.FLAG_DynMod == 0
+        Q_before = (A^k)*init_var*(A^k)';
+        for kk = 0:k-1
+            Q_before = Q_before + (A^kk)*Q*(A^kk)';
+        end
+    elseif Par.FLAG_DynMod == 1
+        [~, Q_before] = IntrinsicDynamicCompoundStats(k, x, init_var);
+        Q_before = Q_before + 1E-3 * eye(4);
     end
     
     % Calculate the mean and variance
@@ -120,16 +125,17 @@ for tt = last:-1:t-L+1
         % No known later observations
         mu = p_y;
         S = R + C*Q_before*C';
-%         S = R + C*(A^k)*init_var*(A^k)'*C';
-%         for kk = 0:k-1
-%             S = S + C*(A^kk)*Q*(A^kk)'*C';
-%         end
+        
     else
         % Known later observation
-        A_after = A^d;
-        Q_after = zeros(4);
-        for dd = 0:d
-            Q_after = Q_after + (A^dd)*Q*(A^dd)';
+        if Par.FLAG_DynMod == 0
+            A_after = A^d;
+            Q_after = zeros(4);
+            for dd = 0:d
+                Q_after = Q_after + (A^dd)*Q*(A^dd)';
+            end
+        elseif Par.FLAG_DynMod == 1
+            [A_after, Q_after] = IntrinsicDynamicCompoundStats(d, p_x, zeros(4));
         end
         R_after = R + C_next*Q_after*C_next';
         invSigma = C'*(R\C) + (A_after'*C_next'/R_after)*C_next*A_after + inv(Q_before);
@@ -137,11 +143,6 @@ for tt = last:-1:t-L+1
         S = inv(invS);
         mu = p_y - C*p_x + (invS\(R\C)/invSigma)*( A_after'*(C_next'/R_after)*(y_next-p_y_next+C_next*p_x_next) + Q_before\p_x );
         
-%         yV = R + C_next * xV * C_next';
-%         invSig = C'*(R\C) + ((A^d)'*C_next'/yV)*C_next*(A^d) + inv(xV);
-%         invS = invR - ((R\C)/invSig)*C'/R;
-%         S = inv(invS);
-%         mu = p_y - C*p_x + invS \ ( (((R\C)*(invSig\(A^d)')*C_next'/yV)*(y_next-p_y_next+C_next*p_x_next)) + (((R\(C/invSig))/xV)*(A^k)*x) );
     end
     
     S = (S+S')/2;
