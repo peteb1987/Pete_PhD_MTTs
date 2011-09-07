@@ -96,14 +96,40 @@ for tt = start_time:end_time
             if Par.FLAG_DynMod == 0
                 trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ(state', (Par.A * prev_state)') );
             elseif Par.FLAG_DynMod == 1
+                % First we need to work out the noise values that invoked
+                % the change in state
                 aT = (state(4)-prev_state(4))/Par.P;
                 if aT==0
                     aP = (state(3)-prev_state(3))*prev_state(3)/Par.P;
                 else
                     aP = aT*(state(3)-prev_state(3))/log(state(4)/prev_state(4));
                 end
-                assert((~isnan(aP))&&(~isnan(aT)), 'NaN acceleration');
-                trans(k) = trans(k) + mvnpdfQ([aT, aP], [0 0]);
+                P = Par.P;
+                phi = prev_state(3);
+                sdot = prev_state(4);
+                new_phi = state(3);
+                new_sdot = state(4);
+                
+                if (aT~=0)&&(aP~=0)
+                    SF1 = 4*aT^2 + aP^2;
+                    SF2 = new_sdot^2;
+                    ax1 = state(1)-prev_state(1) - (SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi));
+                    ax2 = state(2)-prev_state(2) - (SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi));
+                elseif (aT==0)&&(aP~=0)
+                    ax1 = state(1)-prev_state(1) - (sdot^2/aP)*(sin(new_phi)-sin(phi));
+                    ax2 = state(2)-prev_state(2) - (sdot^2/aP)*(cos(new_phi)-cos(phi));
+                elseif (aT~=0)&&(aP==0)
+                    ax1 = state(1)-prev_state(1) - 0.5*P*cos(phi)*(aT*P+2*sdot);
+                    ax2 = state(2)-prev_state(2) - 0.5*P*sin(phi)*(aT*P+2*sdot);
+                else
+                    ax1 = state(1)-prev_state(1) - P*sdot*cos(phi);
+                    ax2 = state(2)-prev_state(2) - P*sdot*sin(phi);
+                end
+                
+                assert((~isnan(aP))&&(~isnan(aT))&&(~isnan(ax1))&&(~isnan(ax2)), 'NaN acceleration');
+                % Finally we can find the probability, which is Gaussian
+                trans(k) = trans(k) + mvnpdfQ([aT, aP, ax1, ax2], [0 0 0 0]);
+                assert(isreal(trans(k)), 'Complex probability');
             end
         end
         

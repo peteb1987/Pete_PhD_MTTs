@@ -14,8 +14,8 @@ StructTemplates;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Par.rand_seed = 2;
-% Par.T = 20;
-% Par.NumTgts = 1;
+Par.T = 20;
+Par.NumTgts = 1;
 % Par.FLAG_SetInitStates = true;
 % Par.InitStates = {[0; 200; 2; 0];
 %                   [0; 210; 2; 0];

@@ -84,9 +84,9 @@ for j = 1:N
             
         elseif Par.FLAG_DynMod == 1
             
-            acc = mvnrnd([0 0], Par.Q_pre);
+            acc = mvnrnd([0 0 0 0], Par.Q_pre);
             prev_state = TrueTracks{j}.state{k-1};
-            TrueTracks{j}.state{k} = IntrinsicDynamicEvaluate(prev_state, acc(1), acc(2));
+            TrueTracks{j}.state{k} = IntrinsicDynamicEvaluate(prev_state, acc);
             
         end
         
