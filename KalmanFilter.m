@@ -21,8 +21,6 @@ PredVar = cell(L, 1);
 Mean = cell(L, 1);
 Var = cell(L, 1);
 
-P = Par.P;
-
 % Set C depending on model
 if Par.FLAG_ObsMod == 0
     C = Par.C;

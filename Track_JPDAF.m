@@ -65,13 +65,7 @@ Est = PrevEst;
 % Project tracks forward
 for j = 1:Est.N
     if t == Est.tracks(j).death
-        state = Par.A * Est.tracks(j).state{t-1-Est.tracks(j).birth+1};
-        covar = Par.A * Est.tracks(j).covar{t-1-Est.tracks(j).birth+1} * Par.A' + Par.Q;
-        Est.tracks(j).death = Est.tracks(j).death + 1;
-        Est.tracks(j).num = Est.tracks(j).num + 1;
-        Est.tracks(j).state = [Est.tracks(j).state; {state}];
-        Est.tracks(j).covar = [Est.tracks(j).covar; {covar}];
-        Est.tracks(j).assoc = [Est.tracks(j).assoc; 0];
+        Est.tracks(j) = ProjectTrack(t, Est.tracks(j));
     end
 end
 

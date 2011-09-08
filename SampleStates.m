@@ -60,22 +60,23 @@ for k = L:-1:1
         next_state = State{k+1};
     end
     
-    if (Par.FLAG_DynMod == 1)
-        % Calculate A_{tt-1} and Q_{tt}
-        [A, Q] = IntrinsicDynamicLinearise(Mean{k});
-    end
-    
     if (k == L) && (t == Set.tracks(j).death-1)
         % Sampling last state in track and window
         mu = Mean{L};
         sigma = Var{L};
     else
-        % Sampling state last in neither window or track
+        % Sampling state last in neither window or track 
+        if (Par.FLAG_DynMod == 1)
+            % Calculate A_{tt-1} and Q_{tt}
+            [A, Q] = IntrinsicDynamicLinearise(next_state);
+        end
         sigma = inv(A' * (Q \ A) + inv(Var{k}));
         mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
     end
     
     sigma = (sigma+sigma')/2;
+    
+%     if t==2, figure(1); plot_gaussian_ellipsoid(Mean{L}(1:2), Var{L}(1:2,1:2)); end
     
     if ~no_samp
         % Sample

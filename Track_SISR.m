@@ -120,14 +120,7 @@ ESS_pre = zeros(Par.NumTgts,1);
 for ii = 1:Par.NumPart
     for j = 1:Par.NumTgts
         if t == PrevPartSet.particles{ii}.tracks(j).death
-            state = Par.A * PrevPartSet.particles{ii}.tracks(j).state{t-1-PrevPartSet.particles{ii}.tracks(j).birth+1};
-            covar = Par.A * PrevPartSet.particles{ii}.tracks(j).covar{t-1-PrevPartSet.particles{ii}.tracks(j).birth+1} * Par.A + Par.Q;
-            PrevPartSet.particles{ii}.tracks(j).death = PrevPartSet.particles{ii}.tracks(j).death + 1;
-            PrevPartSet.particles{ii}.tracks(j).num = PrevPartSet.particles{ii}.tracks(j).num + 1;
-            PrevPartSet.particles{ii}.tracks(j).state = [PrevPartSet.particles{ii}.tracks(j).state; {state}];
-            PrevPartSet.particles{ii}.tracks(j).smooth = [PrevPartSet.particles{ii}.tracks(j).smooth; {state}];
-            PrevPartSet.particles{ii}.tracks(j).covar = [PrevPartSet.particles{ii}.tracks(j).covar; {covar}];
-            PrevPartSet.particles{ii}.tracks(j).assoc = [PrevPartSet.particles{ii}.tracks(j).assoc; 0];
+            PrevPartSet.particles{ii}.tracks(j) = ProjectTrack(t, PrevPartSet.particles{ii}.tracks(j));
         end
     end
 end

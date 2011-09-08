@@ -7,11 +7,11 @@ prev_state = track.state{t-1-track.birth+1};
 
 if Par.FLAG_DynMod == 0
     state = Par.A * prev_state;
-    covar = Par.A * track.covar{t-1-track.birth+1} * Par.A + Par.Q;
+    covar = Par.A * track.covar{t-1-track.birth+1} * Par.A' + Par.Q;
 elseif Par.FLAG_DynMod == 1
     [A, Q] = IntrinsicDynamicLinearise(prev_state);
     state = IntrinsicDynamicPredict(prev_state);
-    covar = A * track.covar{t-1-track.birth+1} * A + Q;
+    covar = A * track.covar{t-1-track.birth+1} * A' + Q;
 end
 
 track.death = track.death + 1;

@@ -105,14 +105,7 @@ end
 % Project tracks forward
 for j = 1:PrevBest.N
     if t == PrevBest.tracks(j).death
-        state = Par.A * PrevBest.tracks(j).state{t-1-PrevBest.tracks(j).birth+1};
-        covar = Par.A * PrevBest.tracks(j).covar{t-1-PrevBest.tracks(j).birth+1} * Par.A + Par.Q;
-        PrevBest.tracks(j).death = PrevBest.tracks(j).death + 1;
-        PrevBest.tracks(j).num = PrevBest.tracks(j).num + 1;
-        PrevBest.tracks(j).state = [PrevBest.tracks(j).state; {state}];
-        PrevBest.tracks(j).smooth = [PrevBest.tracks(j).smooth; {state}];
-        PrevBest.tracks(j).covar = [PrevBest.tracks(j).covar; {covar}];
-        PrevBest.tracks(j).assoc = [PrevBest.tracks(j).assoc; 0];
+        PrevBest.tracks(j) = ProjectTrack(t, PrevBest.tracks(j));
     end
 end
 
@@ -311,7 +304,7 @@ for ii = 2:Par.NumIt
     if new_post==-inf, ap = -inf; end
     
     if type == 1
-        ap_mod = 0;
+        ap_mod = Par.CurrentAcceptScaling * ap;
     elseif type == 2
         ap_mod = Par.HistoryAcceptScaling * ap;
     end

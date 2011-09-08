@@ -147,8 +147,8 @@ for tt = last:-1:t-L+1
     
     S = (S+S')/2;
     
-    thresh1 = 5*sqrt(S(1,1));
-    thresh2 = 5*sqrt(S(2,2));
+    thresh1 = Par.GateSDs*sqrt(S(1,1));
+    thresh2 = Par.GateSDs*sqrt(S(2,2));
     
     % Precalculate some things to speed up the next loop, which is over
     % 100's of observations within a loop over 100's of particles (i.e.
@@ -164,7 +164,7 @@ for tt = last:-1:t-L+1
     indexes = find(test1&test2);
     test = false(1, length(ind));
     for i = indexes
-        test(i) = ((innov(:,i)'/S)*innov(:,i) < 25);
+        test(i) = ((innov(:,i)'/S)*innov(:,i) < Par.GateSDs^2);
     end
     validated = ind(test);
     

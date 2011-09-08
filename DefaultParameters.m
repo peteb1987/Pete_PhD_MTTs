@@ -64,7 +64,7 @@ if Par.FLAG_DynMod == 0
 elseif Par.FLAG_DynMod == 1
     Par.B = zeros(4,2);
     Par.TangentNoiseVar = 0.1;
-    Par.NormalNoiseVar = 10;
+    Par.NormalNoiseVar = 1;
     Par.x1NoiseVar = 1;
     Par.x2NoiseVar = 1;
     Par.Q_pre = [Par.TangentNoiseVar 0 0 0;
@@ -107,6 +107,7 @@ Par.AnalysisLag = 5;
 Par.L = 5;                              % Length of rolling window
 Par.Vlimit = 1.5*Par.Vmax;              % Limit above which we do not accept velocity (lh=0)
 Par.KFInitVar = 1E-20;                  % Variance with which to initialise Kalman Filters (scaled identity matrix)
+Par.GateSDs = 5;                        % Number of standard deviations from the mean to the gate boundary
 
 %%% For SISR schemes %%%
 Par.NumPart = 500;                      % Number of particles per target
@@ -121,4 +122,5 @@ Par.Restart = 10000;                    % Restart after this many iterations
 Par.BurnIn = floor(0.1*Par.NumIt);      % Length of burn-in
 
 %%% For MCMC-IS %%%
-Par.HistoryAcceptScaling = 0.75;
+Par.HistoryAcceptScaling = 0.5;
+Par.CurrentAcceptScaling = 0.5;

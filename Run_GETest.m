@@ -10,7 +10,7 @@ test_flag = str2double(getenv('SGE_TASK_ID'))
 % How many tests?
 num_tests = 11;
 
-scaling = 0:0.1:1;
+% scaling = 0:0.1:1;
 
 % Test loop
 for c = 1:num_tests
@@ -77,87 +77,87 @@ for c = 1:num_tests
 %         [0; 240; 2; 0];};
 
     
-%     % Choose algorithm
-%     switch mod(test_flag,8)
-%         case 1
-%             Par.FLAG_AlgType = 2;
-%         case 2
-%             Par.FLAG_AlgType = 3;
-%         case 3
-%             Par.FLAG_AlgType = 1;
-%             Par.L = 1;
-%         case 4
-%             Par.FLAG_AlgType = 1;
-%             Par.L = 5;
-%         case 5
-%             Par.FLAG_AlgType = 1;
-%             Par.L = 5;
-%             Par.FLAG_RB = true;
-%         case 6
-%             Par.FLAG_AlgType = 0;
-%             Par.L = 1;
-%             Par.S = 1;
-%         case 7
-%             Par.FLAG_AlgType = 0;
-%             Par.L = 5;
-%             Par.S = 5;
-%         case 0
-%             Par.FLAG_AlgType = 0;
-%             Par.L = 5;
-%             Par.S = 5;
-%             Par.FLAG_RB = true;
-%     end
-%     
-%     % Choose observation model
-%     if test_flag > 32
-%         Par.FLAG_ObsMod = 1;
-%         Par.UnifPosDens = 1/(pi*Par.Xmax^2);
-%         Par.ClutDens = (1/Par.Xmax)*(1/(2*pi));
-%         Par.MinInitStateRadius = 0.25;
-%         Par.MaxInitStateRadius = 0.35;
-%         Par.BearingNoiseVar = 1E-4;
-%         Par.RangeNoiseVar = 1;
-%         Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
-%     end
-%     
-%     % Choose scenario
-%     switch ceil(test_flag/8)
-%         case {1,5}
-%             
-%         case {2,6}
-%             Par.PDetect = 0.9;
-%             Par.ExpClutObs = 200;
-%             
-%         case {3,7}
-%             Par.PDetect = 0.9;
-%             Par.ExpClutObs = 200;
-%             Par.ProcNoiseVar = 10;
-%             Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
-%             if Par.FLAG_ObsMod == 0
-%                 Par.ObsNoiseVar = 10;
-%                 Par.R = Par.ObsNoiseVar * eye(2);
-%             elseif Par.FLAG_ObsMod == 1
-%                 Par.BearingNoiseVar = 1E-3;
-%                 Par.RangeNoiseVar = 10;
-%                 Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
-%             end
-%             
-%         case {4,8}
-%             Par.FLAG_SetInitStates = true;
-%             Par.InitStates = {[0; 200; 2; 0];
-%                 [0; 210; 2; 0];
-%                 [0; 220; 2; 0];
-%                 [0; 230; 2; 0];
-%                 [0; 240; 2; 0];};
-% 
-%               
-%     end
-
     % Choose algorithm
-    Par.FLAG_AlgType = 4;
+    switch mod(test_flag,8)
+        case 1
+            Par.FLAG_AlgType = 2;
+        case 2
+            Par.FLAG_AlgType = 3;
+        case 3
+            Par.FLAG_AlgType = 1;
+            Par.L = 1;
+        case 4
+            Par.FLAG_AlgType = 1;
+            Par.L = 5;
+        case 5
+            Par.FLAG_AlgType = 1;
+            Par.L = 5;
+            Par.FLAG_RB = true;
+        case 6
+            Par.FLAG_AlgType = 0;
+            Par.L = 1;
+            Par.S = 1;
+        case 7
+            Par.FLAG_AlgType = 0;
+            Par.L = 5;
+            Par.S = 5;
+        case 0
+            Par.FLAG_AlgType = 0;
+            Par.L = 5;
+            Par.S = 5;
+            Par.FLAG_RB = true;
+    end
     
-    % Set acceptance scaling
-    Par.HistoryAcceptScaling = scaling(test_flag);
+    % Choose observation model
+    if test_flag > 32
+        Par.FLAG_ObsMod = 1;
+        Par.UnifPosDens = 1/(pi*Par.Xmax^2);
+        Par.ClutDens = (1/Par.Xmax)*(1/(2*pi));
+        Par.MinInitStateRadius = 0.25;
+        Par.MaxInitStateRadius = 0.35;
+        Par.BearingNoiseVar = 1E-4;
+        Par.RangeNoiseVar = 1;
+        Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
+    end
+    
+    % Choose scenario
+    switch ceil(test_flag/8)
+        case {1,5}
+            
+        case {2,6}
+            Par.PDetect = 0.9;
+            Par.ExpClutObs = 200;
+            
+        case {3,7}
+            Par.PDetect = 0.9;
+            Par.ExpClutObs = 200;
+            Par.ProcNoiseVar = 10;
+            Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
+            if Par.FLAG_ObsMod == 0
+                Par.ObsNoiseVar = 10;
+                Par.R = Par.ObsNoiseVar * eye(2);
+            elseif Par.FLAG_ObsMod == 1
+                Par.BearingNoiseVar = 1E-3;
+                Par.RangeNoiseVar = 10;
+                Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
+            end
+            
+        case {4,8}
+            Par.FLAG_SetInitStates = true;
+            Par.InitStates = {[0; 200; 2; 0];
+                [0; 210; 2; 0];
+                [0; 220; 2; 0];
+                [0; 230; 2; 0];
+                [0; 240; 2; 0];};
+
+              
+    end
+
+%     % Choose algorithm
+%     Par.FLAG_AlgType = 4;
+%     
+%     % Set acceptance scaling
+%     Par.HistoryAcceptScaling = scaling(test_flag);
     
 %     % Choose observation model
 %     if test_flag > 4

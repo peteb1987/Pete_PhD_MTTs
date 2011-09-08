@@ -105,6 +105,8 @@ function [MC, BestEst, move_types] = MCMCFrame(t, L, PrevChains, PrevBest, Obser
 % PrevBest - The max-posterior estimate from the previous chain - used for state history <=t-L
 % Observs - observations
 
+ac_list = [];
+
 global Par;
 
 s = min(t,Par.S);
@@ -308,6 +310,16 @@ for ii = 2:Par.NumIt
     
     if old_post==-inf, ap = inf; end
     if new_post==-inf, ap = -inf; end
+%     if isinf(old_ppsl)
+%         ap = inf;
+%     end
+%     assert(~isnan(ap), 'NaN acceptance probability');
+    if isnan(ap)
+        ap = -inf;
+    end
+    
+%     PlotParticles({New},1);
+%     ac_list = [ac_list; assoc];
     
     if log(rand) < ap
         

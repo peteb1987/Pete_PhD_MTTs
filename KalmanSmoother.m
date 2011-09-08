@@ -9,8 +9,8 @@ L = size(obs, 1);
 
 % If the length of the window is 0 then just return an empty array
 if L == 0
-    Mean = cell(0,1);
-    Var = cell(0,1);
+    BackMean = cell(0,1);
+    BackVar = cell(0,1);
     return
 end
 
@@ -23,44 +23,56 @@ Var = cell(L, 1);
 
 % Set C depending on model
 if Par.FLAG_ObsMod == 0
-    % Fixed
     C = Par.C;
-
 elseif Par.FLAG_ObsMod == 1
-    % Use EKF approximation, calculated at each step
     C = zeros(2, 4);
-    
+end
+
+% Set A depending on model
+if Par.FLAG_DynMod == 0
+    A = Par.A;
+    Q = Par.Q;
+elseif Par.FLAG_DynMod == 1
+    A = zeros(4,4);
+    Q = zeros(4,4);
 end
 
 % Loop through time
 for k = 1:L
     
-    % Prediction step
-    
     if k==1
-        PredMean{1} = Par.A * init_state;
-        PredVar{1} = Par.A * init_var * Par.A' + Par.Q;
+        state = init_state;
+        var = init_var;
     else
-        PredMean{k} = Par.A * Mean{k-1};
-        PredVar{k} = Par.A * Var{k-1} * Par.A' + Par.Q;
+        state = Mean{k-1};
+        var = Var{k-1};
     end
     
-    % Update step
+    % Dynamic model linearisation
+    if (Par.FLAG_DynMod == 1)
+        [A, Q] = IntrinsicDynamicLinearise(state);
+    end
     
+    % Prediction step
+    if Par.FLAG_DynMod == 0
+        PredMean{k} = A * state;
+    elseif Par.FLAG_DynMod == 1
+        PredMean{k} = IntrinsicDynamicPredict(state);
+    end
+    PredVar{k} = A * var * A' + Q;
+    
+    % Update step
     if ~isempty(obs{k})
         
         % Observation associated with target
-        
         if (Par.FLAG_ObsMod == 1)
-            
-            % Linearisation
+            % Observation model linearisation
             x1 = PredMean{k}(1);
             x2 = PredMean{k}(2);
             C(1,1) = -x2/(x1^2+x2^2);
             C(1,2) = x1/(x1^2+x2^2);
             C(2,1) = x1/sqrt(x1^2+x2^2);
             C(2,2) = x2/sqrt(x1^2+x2^2);
-            
         end
         
         % Innovation
@@ -96,10 +108,17 @@ end
 BackMean = cell(L, 1);
 BackVar = cell(L, 1);
 BackMean{L} = Mean{L}; BackVar{L} = Var{L};
+
 % Smoothing
 for k = L-1:-1:1
     
-    G = Var{k}*Par.A'/PredVar{k+1};
+    if Par.FLAG_DynMod == 1
+        next_state = BackMean{k+1};
+        backward_predict = next_state - [next_state(4)*Par.P*cos(next_state(3)); next_state(4)*Par.P*sin(next_state(3)); 0; 0];
+        [A, Q] = IntrinsicDynamicLinearise(backward_predict);
+    end
+    
+    G = Var{k}*A'/PredVar{k+1};
     BackMean{k} = Mean{k} + G * (BackMean{k+1}-PredMean{k+1});
     BackVar{k} = Var{k} + G * (BackVar{k+1}-PredVar{k+1}) * G';
     

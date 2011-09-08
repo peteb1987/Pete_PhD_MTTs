@@ -47,7 +47,7 @@ for j = 1:N
         TrueTracks{j}.state{1}(3:4) = unifrnd(-Par.Vmax, Par.Vmax, [2,1]);
     elseif Par.FLAG_DynMod == 1
         TrueTracks{j}.state{1}(3) = unifrnd(1, 2*pi);
-        TrueTracks{j}.state{1}(4) = unifrnd(0, Par.Vmax);
+        TrueTracks{j}.state{1}(4) = unifrnd(0.25*Par.Vmax, Par.Vmax);
     end
     
     if Par.FLAG_SetInitStates
