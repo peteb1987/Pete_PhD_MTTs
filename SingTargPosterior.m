@@ -120,8 +120,8 @@ for tt = start_time:end_time
                 if (aT~=0)&&(aP~=0)
                     SF1 = 4*aT^2 + aP^2;
                     SF2 = new_sdot^2;
-                    ax1 = state(1)-prev_state(1) - (SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi));
-                    ax2 = state(2)-prev_state(2) - (SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi));
+                    ax1 = state(1)-prev_state(1) - ((SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi)));
+                    ax2 = state(2)-prev_state(2) - ((SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi)));
                 elseif (aT==0)&&(aP~=0)
                     ax1 = state(1)-prev_state(1) - (sdot^2/aP)*(sin(new_phi)-sin(phi));
                     ax2 = state(2)-prev_state(2) - (sdot^2/aP)*(cos(new_phi)-cos(phi));
@@ -135,7 +135,7 @@ for tt = start_time:end_time
                 
                 assert((~isnan(aP))&&(~isnan(aT))&&(~isnan(ax1))&&(~isnan(ax2)), 'NaN acceleration');
                 % Finally we can find the probability, which is Gaussian
-                trans(k) = trans(k) + mvnpdfQ([aT, aP, ax1, ax2], [0 0 0 0]);
+                trans(k) = trans(k) + log( (1-Par.PDeath) * mvnpdfQ([aT, aP, ax1, ax2], [0 0 0 0]) );
                 assert(isreal(trans(k)), 'Complex probability');
             end
         end

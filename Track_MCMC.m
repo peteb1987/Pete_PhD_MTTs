@@ -105,9 +105,9 @@ function [MC, BestEst, move_types] = MCMCFrame(t, L, PrevChains, PrevBest, Obser
 % PrevBest - The max-posterior estimate from the previous chain - used for state history <=t-L
 % Observs - observations
 
-ac_list = [];
-
 global Par;
+
+ac_list = zeros(Par.NumIt, Par.L);
 
 s = min(t,Par.S);
 b = Par.BridgeLength;
@@ -119,7 +119,7 @@ origin_post_store = -inf(Par.NumIt, Par.NumTgts);
 
 % Initialise the stores (the t-1 parts)
 for j = 1:Par.NumTgts
-    [reverse_kernel_store(1, j), ~, ~] = SampleCurrent(j, t-1, L-1, PrevBest, Observs, true);
+    [reverse_kernel_store(1, j), empty1, empty2] = SampleCurrent(j, t-1, L-1, PrevBest, Observs, true);
     origin_post_store(1, j) = SingTargPosterior(j, t-1, L-1, PrevBest, Observs);
 end
 
@@ -215,7 +215,7 @@ for ii = 2:Par.NumIt
             New.tracks(j).state(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = state;
             New.tracks(j).covar(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = var;
             New.tracks(j).assoc(t-d+1 -New.tracks(j).birth+1:t -New.tracks(j).birth+1) = assoc;
-            [old_ppsl, ~, ~] = SampleCurrent(j, t, d, Old, Observs, true);
+            [old_ppsl, empty1, empty2] = SampleCurrent(j, t, d, Old, Observs, true);
             
             
         case 2 % Single target, history and window - assumes independence for frames <= t-L
@@ -319,7 +319,7 @@ for ii = 2:Par.NumIt
     end
     
 %     PlotParticles({New},1);
-%     ac_list = [ac_list; assoc];
+    ac_list(ii, 1:length(assoc))= assoc;
     
     if log(rand) < ap
         
@@ -331,7 +331,7 @@ for ii = 2:Par.NumIt
             Obs = ListAssocObservs(last, num, New.tracks(j), Observs);
             init_state = New.tracks(j).state{1 -New.tracks(j).birth+1};
             init_var = Par.KFInitVar*eye(4);
-            [Mean, ~] = KalmanSmoother(Obs, init_state, init_var);
+            [Mean, empty] = KalmanSmoother(Obs, init_state, init_var);
             New.tracks(j).smooth(first -New.tracks(j).birth+1:last -New.tracks(j).birth+1) = Mean;
         end
      

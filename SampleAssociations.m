@@ -116,7 +116,7 @@ for tt = last:-1:t-L+1
             Q_before = Q_before + (A^kk)*Q*(A^kk)';
         end
     elseif Par.FLAG_DynMod == 1
-        [~, Q_before] = IntrinsicDynamicCompoundStats(k, x, init_var);
+        [empty, Q_before] = IntrinsicDynamicCompoundStats(k, x, init_var);
 %         Q_before = Q_before + 1E-3 * eye(4);
     end
     

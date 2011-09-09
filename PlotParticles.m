@@ -10,7 +10,11 @@ else
     figure(f);
 end
 
-cellfun(@PlotOnePart, Particles);
+if (Par.FLAG_AlgType == 0)||(Par.FLAG_AlgType == 4)
+    cellfun(@PlotOnePart, Particles(1:Par.NumTgts:length(Particles)));
+else
+    cellfun(@PlotOnePart, Particles);
+end
 
 plot(0, 0, 'xk');
 
@@ -29,10 +33,10 @@ for j = 1:Part.N
         col = [rand, rand, 0];
         
         % Collate state
-        if ~Par.FLAG_RB
-            state = cell2mat(Part.tracks(j).state');
-        else
+        if Par.FLAG_RB&&((Par.FLAG_AlgType==0)||(Par.FLAG_AlgType==1))
             state = cell2mat(Part.tracks(j).smooth');
+        else
+            state = cell2mat(Part.tracks(j).state');
         end
         x = state(1, :);
         y = state(2, :);

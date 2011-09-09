@@ -14,7 +14,7 @@ StructTemplates;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Par.rand_seed = 0;
-% Par.T = 20;
+Par.T = 20;
 % Par.NumTgts = 1;
 % Par.P = 2;
 % Par.FLAG_SetInitStates = true;
@@ -39,11 +39,11 @@ StructTemplates;
 Par.FLAG_AlgType = 0;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
-Par.L = 5;
-Par.S = 5;
+Par.L = 1;
+Par.S = 1;
 
-Par.FLAG_RB = true;
-% Par.NumIt = 500;
+% Par.FLAG_RB = true;
+Par.NumIt = 2500;
 
 % Par.NumTgts = 1;
 % Par.T = 10;
