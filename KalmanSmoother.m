@@ -113,9 +113,7 @@ BackMean{L} = Mean{L}; BackVar{L} = Var{L};
 for k = L-1:-1:1
     
     if Par.FLAG_DynMod == 1
-        next_state = BackMean{k+1};
-        backward_predict = next_state - [next_state(4)*Par.P*cos(next_state(3)); next_state(4)*Par.P*sin(next_state(3)); 0; 0];
-        [A, Q] = IntrinsicDynamicLinearise(backward_predict);
+        [A, Q] = IntrinsicDynamicLinearise(BackMean{k+1});
     end
     
     G = Var{k}*A'/PredVar{k+1};
