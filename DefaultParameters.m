@@ -11,7 +11,7 @@ Par.rand_seed = 1;
 %%% Scenario Flags                                                      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Par.FLAG_AlgType = 0;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
+Par.FLAG_AlgType = 1;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
 Par.FLAG_DynMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = intrinsics
 Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
@@ -71,7 +71,9 @@ elseif Par.FLAG_DynMod == 1
                  0 Par.NormalNoiseVar 0 0;
                  0 0 Par.x1NoiseVar 0;
                  0 0 0 Par.x2NoiseVar];                                    % Noise variance matrix of accelerations. Must be weighted by noise jacobian before use as Q.
-    Par.Qchol = chol(Par.Q_pre);
+	Par.Q = Par.Q_pre;
+    Par.Qchol = chol(Par.Q_pre)';
+    Par.UQchol = chol(3*Par.Q_pre);
     Par.MinSpeed = 0.1;
 end
 Par.ExpBirth = 0.1;                                                        % Expected number of new targets in a frame (poisson deistributed)

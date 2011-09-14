@@ -31,8 +31,13 @@ else
     new_phi = phi + (aP*P)/sdot;
 end
 
-state(1) = x1 + (SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi)) + ax1;
-state(2) = x2 + (SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi)) + ax2;
+if (aT~=0)&&(aP~=0)
+    state(1) = x1 + (SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi)) + ax1;
+    state(2) = x2 + (SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi)) + ax2;
+else
+    state(1) = x1 + ax1 + ( sdot*P*cos(phi) );
+    state(2) = x2 + ax2 + ( sdot*P*sin(phi) ); 
+end
 state(3) = new_phi;
 state(4) = new_sdot;
 

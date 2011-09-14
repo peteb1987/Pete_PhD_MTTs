@@ -13,9 +13,9 @@ StructTemplates;
 %%% Set test-specific parameters                                        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Par.rand_seed = 0;
-Par.T = 20;
-% Par.NumTgts = 1;
+Par.rand_seed = 0;
+% Par.T = 20;
+Par.NumTgts = 5;
 % Par.P = 2;
 % Par.FLAG_SetInitStates = true;
 % Par.InitStates = {[0; 200; 2; 0];
@@ -36,14 +36,14 @@ Par.T = 20;
 
 % Par.rand_seed = 2;
 
-Par.FLAG_AlgType = 0;
+Par.FLAG_AlgType = 5;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
-Par.L = 1;
-Par.S = 1;
+Par.L = 3;
+Par.S = 3;
 
 % Par.FLAG_RB = true;
-Par.NumIt = 2500;
+% Par.NumIt = 500;
 
 % Par.NumTgts = 1;
 % Par.T = 10;
@@ -92,6 +92,8 @@ elseif Par.FLAG_AlgType == 3
     [ Results ] = Track_JPDAF(detections, Observs, InitStates );
 elseif Par.FLAG_AlgType == 4
     [ Results ] = Track_MCMC_IS(detections, Observs, InitStates );
+elseif Par.FLAG_AlgType == 5
+    [ Results ] = Track_UPDAF(detections, Observs, InitStates );
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -101,6 +103,6 @@ end
 if (Par.FLAG_AlgType == 0) || (Par.FLAG_AlgType == 1) || (Par.FLAG_AlgType == 4)
     PlotParticles(Results{Par.T}.particles, state_fig);
     [ assoc ] = RetrieveAssocs( Par.T, Results{Par.T}.particles );
-elseif (Par.FLAG_AlgType == 2) || (Par.FLAG_AlgType == 3)
+elseif (Par.FLAG_AlgType == 2) || (Par.FLAG_AlgType == 3) || (Par.FLAG_AlgType == 5)
     PlotParticles(Results(Par.T), state_fig);
 end

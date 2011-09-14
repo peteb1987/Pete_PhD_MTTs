@@ -68,10 +68,40 @@ for k = L:-1:1
         % Sampling state last in neither window or track 
         if (Par.FLAG_DynMod == 1)
             % Calculate A_{tt-1} and Q_{tt}
-            [A, Q] = IntrinsicDynamicLinearise(next_state);
+%             [A, Q] = IntrinsicDynamicLinearise(next_state);
+%             sigma = inv(A' * (Q \ A) + inv(Var{k}));
+%             mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k}));
+
+            % generate sigma points
+            sig_pts = zeros(4,9);
+            sig_wts = zeros(9,1);
+            sig_wts(1) = -1/3;
+            for spi = 2:9
+                col = mod(spi-2,4)+1;
+                if spi<6, sgn=1; else sgn=-1; end
+                sig_pts(:,spi) = sgn * Par.UQchol(:,col);
+                sig_wts(spi) = 1/6;
+            end
+            
+            % Propagate points backwards
+            back_sig_pts = zeros(4,9);
+            for spi = 1:9
+                back_sig_pts(:,spi) = IntrinsicDynamicInverse(next_state, sig_pts(:,spi));
+            end
+            back_mean = back_sig_pts * sig_wts;
+            back_less_mean = bsxfun(@minus, back_sig_pts, back_mean);
+            back_var = zeros(4,4);
+            for spi = 1:9
+                back_var = back_var + sig_wts(spi) * back_less_mean(:,spi)*back_less_mean(:,spi)';
+            end
+            
+            sigma = inv(inv(back_var) + inv(Var{k}));
+            mu = sigma * (back_var\back_mean + Var{k}\Mean{k}); %#ok<MINV>
+            
+        else%if (Par.FLAG_DynMod == 0)
+            sigma = inv(A' * (Q \ A) + inv(Var{k}));
+            mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
         end
-        sigma = inv(A' * (Q \ A) + inv(Var{k}));
-        mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
     end
     
     sigma = (sigma+sigma')/2;

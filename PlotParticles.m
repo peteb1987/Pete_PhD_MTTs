@@ -44,7 +44,7 @@ for j = 1:Part.N
         % Plot track
         plot(x, y, '-', 'color', col);
         
-        if (Par.FLAG_AlgType == 2)||(Par.FLAG_AlgType == 3)
+        if (Par.FLAG_AlgType == 2)||(Par.FLAG_AlgType == 3)||(Par.FLAG_AlgType == 5)
             state = Part.tracks(j).state;
             covar = Part.tracks(j).covar;
             for t = 1:length(state)
