@@ -183,10 +183,10 @@ for tt = last:-1:t-L+1
     % Clutter
     ppsl_weights(N+1) = Par.ClutDens * (1-Par.PDetect);
     
-    if Par.FLAG_AlgType ~= 4
-        % Remove used ones
-        ppsl_weights(obs_assigned) = 0;
-    end
+%     if Par.FLAG_AlgType ~= 4
+%         % Remove used ones
+%         ppsl_weights(obs_assigned) = 0;
+%     end
     
     % Normalise
     ppsl_weights = ppsl_weights/sum(ppsl_weights);

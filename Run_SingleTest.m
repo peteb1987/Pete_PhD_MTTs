@@ -13,9 +13,9 @@ StructTemplates;
 %%% Set test-specific parameters                                        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Par.rand_seed = 0;
+% Par.rand_seed = 0;
 % Par.T = 20;
-Par.NumTgts = 5;
+% Par.NumTgts = 1;
 % Par.P = 2;
 % Par.FLAG_SetInitStates = true;
 % Par.InitStates = {[0; 200; 2; 0];
@@ -36,7 +36,7 @@ Par.NumTgts = 5;
 
 % Par.rand_seed = 2;
 
-Par.FLAG_AlgType = 5;
+Par.FLAG_AlgType = 1;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
 Par.L = 3;

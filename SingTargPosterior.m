@@ -72,20 +72,17 @@ for tt = start_time:end_time
                 % Calculate predictive likelihood using Rao-Blackwellisation
                 if Par.FLAG_ObsMod == 0
                     C = [1 0 0 0; 0 1 0 0];
+                    PL_mean = C * p_x;
                 elseif Par.FLAG_ObsMod == 1
                     [p_bng, p_rng] = cart2pol(p_x(1), p_x(2));
                     p_rngsq = p_rng^2;
-                    J = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+                    C = [-p_x(2)/p_rngsq, p_x(1)/p_rngsq, 0, 0; p_x(1)/p_rng, p_x(2)/p_rng, 0, 0];
+                    PL_mean = [p_bng; p_rng];
                 end
                 
-                if Par.FLAG_ObsMod == 0
-                    PL_mean = C * p_x;
-                    PL_var = C * ( A * Var{k} * A' + Q ) * C' + Par.R;
-                elseif Par.FLAG_ObsMod == 1
-                    PL_mean = [p_bng; p_rng];
-                    PL_var = J * ( A * Var{k} * A' + Q ) * J' + Par.R;
-                end
+                PL_var = C * ( A * Var{k} * A' + Q ) * C' + Par.R;
                 PL_var = 0.5*(PL_var + PL_var');
+                
                 like(k) = like(k) + log( mvnpdf(Observs(tt).r(ass, :), PL_mean', PL_var) );
                 
             end

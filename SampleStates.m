@@ -68,6 +68,7 @@ for k = L:-1:1
         % Sampling state last in neither window or track 
         if (Par.FLAG_DynMod == 1)
             % Calculate A_{tt-1} and Q_{tt}
+            
 %             [A, Q] = IntrinsicDynamicLinearise(next_state);
 %             sigma = inv(A' * (Q \ A) + inv(Var{k}));
 %             mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k}));
@@ -98,7 +99,7 @@ for k = L:-1:1
             sigma = inv(inv(back_var) + inv(Var{k}));
             mu = sigma * (back_var\back_mean + Var{k}\Mean{k}); %#ok<MINV>
             
-        else%if (Par.FLAG_DynMod == 0)
+        elseif (Par.FLAG_DynMod == 0)
             sigma = inv(A' * (Q \ A) + inv(Var{k}));
             mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k})); %#ok<MINV>
         end

@@ -107,8 +107,6 @@ function [MC, BestEst, move_types] = MCMCFrame(t, L, PrevChains, PrevBest, Obser
 
 global Par;
 
-ac_list = zeros(Par.NumIt, Par.L);
-
 s = min(t,Par.S);
 b = Par.BridgeLength;
 
@@ -310,17 +308,11 @@ for ii = 2:Par.NumIt
     
     if old_post==-inf, ap = inf; end
     if new_post==-inf, ap = -inf; end
-%     if isinf(old_ppsl)
-%         ap = inf;
-%     end
-%     assert(~isnan(ap), 'NaN acceptance probability');
+    
     if isnan(ap)
         ap = -inf;
     end
-    
-%     PlotParticles({New},1);
-    ac_list(ii, 1:length(assoc))= assoc;
-    
+
     if log(rand) < ap
         
         % If RB, smooth state
