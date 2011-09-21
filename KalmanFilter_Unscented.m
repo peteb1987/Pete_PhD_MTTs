@@ -80,7 +80,7 @@ for k = 1:L
             sig_pts_obs = zeros(2,Np);
             for ii = 1:Np
                 [bng, rng] = cart2pol(sig_pts_next(1,ii), sig_pts_next(2,ii));
-                sig_pts_next(:,ii) = [bng; rng];
+                sig_pts_obs(:,ii) = [bng; rng];
             end
             
             % Remaining stats

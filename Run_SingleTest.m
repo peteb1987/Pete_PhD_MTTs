@@ -39,14 +39,14 @@ StructTemplates;
 Par.FLAG_AlgType = 0;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
-Par.L = 5;
-Par.S = 5;
+% Par.L = 1;
+% Par.S = 1;
 
 % Par.FLAG_RB = true;
-% Par.NumIt = 500;
 
+% Par.NumIt = 500;
 % Par.NumTgts = 1;
-% Par.T = 10;
+% Par.T = 20;
 
 % Par.PDetect = 0.9;
 % Par.ExpClutObs = 200;

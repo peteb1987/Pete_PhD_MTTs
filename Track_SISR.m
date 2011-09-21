@@ -140,13 +140,13 @@ for ii = 1:Par.NumPart
     for j = 1:Par.NumTgts
         
         % Calculate reverse kernel probability
-        [reverse_kernel, empty1, empty2] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, true);
+        [reverse_kernel, ~, ~] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, true);
         
         % Calculate t-1 posterior
         origin_post = SingTargPosterior(j, t-1, L-1, PartSet.particles{ii}, Observs);
         
         % Propose new current states
-        [ppsl, PartAssocs{j}, PartStates{j}, empty1, PartVars{j}] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, false);
+        [ppsl, PartAssocs{j}, PartStates{j}, ~, PartVars{j}] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, false);
         
         % Update a dummy set for calculating the posterior (we don't want
         % this target to block future ones - independence assumption)
@@ -163,7 +163,7 @@ for ii = 1:Par.NumPart
             + (post + reverse_kernel) ...
             - (origin_post + ppsl);
         
-        if isnan(weights{j}(ii))
+        if isnan(weights{j}(ii))||isinf(weights{j}(ii))
             weights{j}(ii) = -inf;
         end
         
@@ -186,7 +186,7 @@ for ii = 1:Par.NumPart
             Obs = ListAssocObservs(last, num, PartSet.particles{ii}.tracks(j), Observs);
             init_state = PartSet.particles{ii}.tracks(j).state{1 -PartSet.particles{ii}.tracks(j).birth+1};
             init_var = Par.KFInitVar*eye(4);
-            [Mean, empty1] = KalmanSmoother(Obs, init_state, init_var);
+            [Mean, ~] = KalmanSmoother(Obs, init_state, init_var);
             PartSet.particles{ii}.tracks(j).smooth(first -PartSet.particles{ii}.tracks(j).birth+1:last -PartSet.particles{ii}.tracks(j).birth+1) = Mean;
         end 
         
