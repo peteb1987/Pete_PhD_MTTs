@@ -2,7 +2,7 @@ function [ppsl_prob, assoc, state, mean, var] = SampleCurrent(j, t, L, Set, Obse
 %SAMPLECURRENT Sample the current associations and states
 
 % Associations
-[assoc, assoc_prob] = SampleAssociations(j, t, L, Set, Observs, no_samp);
+[assoc, assoc_prob] = SampleAssociations_Unscented(j, t, L, Set, Observs, no_samp);
 Set.tracks(j).assoc(t-L+1 -Set.tracks(j).birth+1:t -Set.tracks(j).birth+1) = assoc;
 
 % States

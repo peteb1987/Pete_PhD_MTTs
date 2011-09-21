@@ -17,14 +17,15 @@ sdot = prev_state(4);
 x1 = prev_state(1);
 x2 = prev_state(2);
 
-SF1 = 4*aT^2 + aP^2;
-SF2 = (aT*P+sdot)^2;
-
 new_sdot = sdot + aT*P;
 if new_sdot<Par.MinSpeed
     new_sdot=Par.MinSpeed;
     aT = (new_sdot-sdot)/P;
 end
+
+SF1 = 4*aT^2 + aP^2;
+SF2 = (aT*P+sdot)^2;
+
 if aT~=0
     new_phi = phi + (aP/aT)*log(new_sdot/sdot);
 else
@@ -42,6 +43,7 @@ state(3) = new_phi;
 state(4) = new_sdot;
 
 assert(~any(isnan(state)), 'NaN state!');
+assert(all(isreal(state)), 'Complex state!');
 
 end
 

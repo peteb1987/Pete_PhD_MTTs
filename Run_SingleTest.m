@@ -36,11 +36,11 @@ StructTemplates;
 
 % Par.rand_seed = 2;
 
-Par.FLAG_AlgType = 1;
+Par.FLAG_AlgType = 0;
 % Par.FLAG_DynMod = 1;
 % Par.FLAG_ObsMod = 1;
-Par.L = 3;
-Par.S = 3;
+Par.L = 5;
+Par.S = 5;
 
 % Par.FLAG_RB = true;
 % Par.NumIt = 500;

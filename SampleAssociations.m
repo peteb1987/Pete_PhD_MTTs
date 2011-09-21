@@ -116,7 +116,7 @@ for tt = last:-1:t-L+1
             Q_before = Q_before + (A^kk)*Q*(A^kk)';
         end
     elseif Par.FLAG_DynMod == 1
-        [empty, Q_before] = IntrinsicDynamicCompoundStats(k, x, init_var);
+        [~, Q_before] = IntrinsicDynamicCompoundStats(k, x, init_var);
 %         Q_before = Q_before + 1E-3 * eye(4);
     end
     
@@ -142,6 +142,11 @@ for tt = last:-1:t-L+1
         invS = invR - ((R\C)/invSigma)*C'/R;
         S = inv(invS);
         mu = p_y - C*p_x + (invS\(R\C)/invSigma)*( A_after'*(C_next'/R_after)*(y_next-p_y_next+C_next*p_x_next) + Q_before\p_x );
+        
+        Sigma = (C_next*A_after*Q_before*A_after'*C_next'+C_next*Q_after*C_next'+R);
+        Cross = (C*Q_before*A_after'*C_next');
+        mu = p_y + (Cross/Sigma)*(y_next-p_y_next);
+        S = C*Q_before*C'+R - (Cross/Sigma)*Cross';
         
     end
     

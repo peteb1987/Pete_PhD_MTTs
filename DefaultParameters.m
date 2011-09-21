@@ -14,7 +14,7 @@ Par.rand_seed = 1;
 Par.FLAG_AlgType = 1;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
 Par.FLAG_DynMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = intrinsics
-Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
+Par.FLAG_ObsMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
 Par.FLAG_SetInitStates = false;                 % false = generate starting points randomly. true = take starting points from Par.InitStates
