@@ -3,7 +3,7 @@ function [ sig_pts, sig_wts, Np ] = UnscentedTransform( mean, var )
 
 % mean is a column vector, var is a square matrix
 
-kappa = 1;      % Unscented transform parameter (as in Julier & Uhlmann 1997)
+kappa = 0;      % Unscented transform parameter (as in Julier & Uhlmann 1997)
 
 % Initialise
 N = size(mean, 1);

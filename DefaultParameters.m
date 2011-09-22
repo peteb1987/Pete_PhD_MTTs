@@ -14,7 +14,7 @@ Par.rand_seed = 1;
 Par.FLAG_AlgType = 1;                           % 0 = MCMC, 1 = SISR, 2 = PDAF
 Par.FLAG_DynMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = intrinsics
-Par.FLAG_ObsMod = 0;                            % 0 = linear Gaussian
+Par.FLAG_ObsMod = 1;                            % 0 = linear Gaussian
                                                 % 1 = bearing and range
 
 Par.FLAG_SetInitStates = false;                 % false = generate starting points randomly. true = take starting points from Par.InitStates
@@ -28,7 +28,7 @@ Par.FLAG_RB = false;                             % Use Rao-Blackwellisation
 %%% Scenario Parameters                                                 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Par.NumTgts = 5;                                % Number of targets
+Par.NumTgts = 1;                                % Number of targets
 
 Par.T = 50;                                     % Number of frames
 Par.P = 1; P = Par.P;                           % Sampling period
@@ -117,7 +117,7 @@ Par.ResamThresh = 0.1;                  % Resampling threshold as ESS/NumPart
 Par.ResampleLowWeightThresh = 30;       % Orders of magnitude below max for particle killing
 
 %%% For MCMC shemes %%%
-Par.NumIt = 5000;                       % Number of iterations
+Par.NumIt = 500;                        % Number of iterations
 Par.S = Par.L;                          % Max distance previously from which particles are sampled
 Par.BridgeLength = 1;                   % Length of bridge for bridging-history proposals.
 Par.Restart = 10000;                    % Restart after this many iterations

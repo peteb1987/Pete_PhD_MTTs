@@ -30,6 +30,8 @@ else
     phi = new_phi - (aP*P)/sdot;
 end
 
+error('FIX THIS FUNCTION');
+%%% SHOULD BE 4 CASES HERE %%%
 if (aT~=0)&&(aP~=0)
     state(1) = new_x1 - ((new_sdot^2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi))) - ax1;
     state(2) = new_x2 - ((new_sdot^2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi))) - ax2;

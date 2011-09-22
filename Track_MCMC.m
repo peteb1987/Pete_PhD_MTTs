@@ -362,7 +362,7 @@ BestEst.origin_time(:) = t;
 
 % for j = 1:Par.NumTgts
 %     best_ind = find(MC.posteriors(:,j)==max(MC.posteriors(:,j)), 1);
-%     BestEst.tracks(j) = MC.particles{best_ind}.tracks(j).Copy;
+%     BestEst.tracks(j) = MC.particles{best_ind}.tracks(j);
 %     BestEst.origin(j) = best_ind;
 % end
 

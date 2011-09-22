@@ -81,7 +81,7 @@ for j = 1:Par.NumTgts
     
     % Form sigma points of augmented state
     na = 8;
-    kappa = -4;                     % IF YOU GET NON-POSITIVE DEFINITE COVARIANCES, INCREASE THIS (PD assured if k>0)
+    kappa = 0;                     % IF YOU GET NON-POSITIVE DEFINITE COVARIANCES, INCREASE THIS (PD assured if k>0)
     sig_pts = zeros(na,2*na+1);
     sig_wts = zeros(2*na+1,1);
     sig_pts(1:4,1) = prev_state;
