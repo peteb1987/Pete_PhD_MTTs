@@ -13,53 +13,11 @@ StructTemplates;
 %%% Set test-specific parameters                                        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Par.rand_seed = 10;
-% Par.T = 20;
-Par.NumTgts = 20;
-% Par.P = 2;
-% Par.FLAG_SetInitStates = true;
-% Par.InitStates = {[0; 200; 2; 0];
-%                   [0; 210; 2; 0];
-%                   [0; 220; 2; 0];
-%                   [0; 230; 2; 0];
-%                   [0; 240; 2; 0];};
-% Par.ProcNoiseVar = 10;
-% Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
-% Par.ObsNoiseVar = 10;
-% Par.R = Par.ObsNoiseVar * eye(2);
-% Par.ExpClutObs = 200;
-% Par.PDetect = 0.9;
-
-% Par.BearingNoiseVar = 1E-3;
-% Par.RangeNoiseVar = 10;
-% Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
-
-% Par.rand_seed = 2;
-
-Par.FLAG_AlgType = 5;
-% Par.FLAG_DynMod = 1;
-% Par.FLAG_ObsMod = 1;
-% Par.L = 3;
-% Par.S = 3;
-
+Par.rand_seed = 9;
+Par.FLAG_AlgType = 0;
 % Par.FLAG_RB = true;
-
-% Par.NumIt = 500;
-% Par.NumTgts = 1;
-% Par.T = 20;
-
-% Par.PDetect = 0.9;
-% Par.ExpClutObs = 200;
-% Par.ProcNoiseVar = 10;
-% Par.Q = Par.ProcNoiseVar * [P^3/3 0 P^2/2 0; 0 P^3/3 0 P^2/2; P^2/2 0 P 0; 0 P^2/2 0 P];
-% if Par.FLAG_ObsMod == 0
-%     Par.ObsNoiseVar = 10;
-%     Par.R = Par.ObsNoiseVar * eye(2);
-% elseif Par.FLAG_ObsMod == 1
-%     Par.BearingNoiseVar = 1E-3;
-%     Par.RangeNoiseVar = 10;
-%     Par.R = [Par.BearingNoiseVar 0; 0 Par.RangeNoiseVar];
-% end
+Par.L = 5;
+Par.S = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

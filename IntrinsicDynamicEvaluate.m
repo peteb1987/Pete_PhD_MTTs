@@ -3,49 +3,54 @@ function [ state ] = IntrinsicDynamicEvaluate( prev_state, acc )
 % accelerations.
 
 global Par;
+min_speed = Par.MinSpeed;
+P = Par.P;
 
-aT = acc(1);
-aP = acc(2);
-ax1 = acc(3);
-ax2 = acc(4);
+Np = size(acc, 2);
 
-state = zeros(4,1);
+aT = acc(1,:);
+aP = acc(2,:);
+ax1 = acc(3,:);
+ax2 = acc(4,:);
 
-phi = prev_state(3);
-sdot = prev_state(4);
-x1 = prev_state(1);
-x2 = prev_state(2);
+state = zeros(4,Np);
 
-new_sdot = sdot + aT*Par.P;
-if new_sdot<Par.MinSpeed
-    new_sdot=Par.MinSpeed;
-    aT = (new_sdot-sdot)/Par.P;
-end
+phi = prev_state(3,:);
+sdot = prev_state(4,:);
+x1 = prev_state(1,:);
+x2 = prev_state(2,:);
 
-SF1 = 4*aT^2 + aP^2;
-SF2 = new_sdot^2;
+new_sdot = sdot + aT*P;
+new_sdot(new_sdot<min_speed) = min_speed;
+aT = (new_sdot-sdot)/P;
+
+SF1 = 4*aT.^2 + aP.^2;
+SF2 = new_sdot.^2;
 
 if aT~=0
-    new_phi = phi + (aP/aT)*log(new_sdot/sdot);
+    new_phi = phi + (aP./aT).*log(new_sdot./sdot);
 else
-    new_phi = phi + (aP*Par.P)/sdot;
+    new_phi = phi + (aP.*P)./sdot;
 end
 
-if (aT~=0)&&(aP~=0)
-    state(1) = x1 + (SF2/SF1)*( aP*sin(new_phi)+2*aT*cos(new_phi)) - (sdot^2/SF1)*( aP*sin(phi)+2*aT*cos(phi)) + ax1;
-    state(2) = x2 + (SF2/SF1)*(-aP*cos(new_phi)+2*aT*sin(new_phi)) - (sdot^2/SF1)*(-aP*cos(phi)+2*aT*sin(phi)) + ax2;
-elseif (aT==0)&&(aP~=0)
-    state(1) = x1 + (SF2/aP)*( sin(new_phi) - sin(phi) ) + ax1;
-    state(2) = x2 + (SF2/aP)*( -cos(new_phi) + cos(phi) ) + ax2;
-elseif (aT~=0)&&(aP==0)
-    state(1) = x1 + 0.5*Par.P*cos(phi)*new_sdot + ax1;
-    state(2) = x2 + 0.5*Par.P*sin(phi)*new_sdot + ax2;
-else
-    state(1) = x1 + ax1 + ( sdot*Par.P*cos(phi) );
-    state(2) = x2 + ax2 + ( sdot*Par.P*sin(phi) ); 
+
+for ii = 1:Np
+    if (aT(ii)~=0)&&(aP(ii)~=0)
+        state(1,ii) = x1(ii) + (SF2(ii)./SF1(ii)).*( aP(ii).*sin(new_phi(ii))+2*aT(ii).*cos(new_phi(ii))) - (sdot(ii)^2./SF1(ii))*( aP(ii).*sin(phi(ii))+2*aT(ii).*cos(phi(ii))) + ax1(ii);
+        state(2,ii) = x2(ii) + (SF2(ii)./SF1(ii)).*(-aP(ii).*cos(new_phi(ii))+2*aT(ii).*sin(new_phi(ii))) - (sdot(ii)^2./SF1(ii))*(-aP(ii).*cos(phi(ii))+2*aT(ii).*sin(phi(ii))) + ax2(ii);
+    elseif (aT(ii)==0)&&(aP(ii)~=0)
+        state(1,ii) = x1(ii) + (SF2(ii)./aP(ii)).*( sin(new_phi(ii)) - sin(phi(ii)) ) + ax1(ii);
+        state(2,ii) = x2(ii) + (SF2(ii)./aP(ii)).*( -cos(new_phi(ii)) + cos(phi(ii)) ) + ax2(ii);
+    elseif (aT(ii)~=0)&&(aP(ii)==0)
+        state(1,ii) = x1(ii) + 0.5*P*cos(phi(ii)).*new_sdot(ii) + ax1(ii);
+        state(2,ii) = x2(ii) + 0.5*P*sin(phi(ii)).*new_sdot(ii) + ax2(ii);
+    else
+        state(1,ii) = x1(ii) + ax1(ii) + ( sdot(ii)*P.*cos(phi(ii)) );
+        state(2,ii) = x2(ii) + ax2(ii) + ( sdot(ii)*P.*sin(phi(ii)) );
+    end
 end
-state(3) = new_phi;
-state(4) = new_sdot;
+state(3,:) = new_phi;
+state(4,:) = new_sdot;
 
 % assert(~any(isnan(state)), 'NaN state!');
 % assert(all(isreal(state)), 'Complex state!');

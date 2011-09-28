@@ -1,2 +1,2 @@
 #!/bin/bash
-qsub -m be -l lr=1 -t 1-11 ge_script.sh
+qsub -m be -t 1-36 ge_script_MCMCIS.sh

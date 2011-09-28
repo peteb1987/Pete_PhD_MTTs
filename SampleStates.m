@@ -15,9 +15,6 @@ end
 if Par.FLAG_DynMod == 0
     A = Par.A;
     Q = Par.Q;
-elseif Par.FLAG_DynMod == 1
-    A = zeros(4,4);
-    Q = zeros(4,4);
 end
 
 % How long should the KF run for?
@@ -74,44 +71,44 @@ for k = L:-1:1
         if (Par.FLAG_DynMod == 1)
             % Calculate A_{tt-1} and Q_{tt}
             
+            %%% Linearisation method %%%
+            
 %             [A, Q] = IntrinsicDynamicLinearise(next_state);
 %             sigma = inv(A' * (Q \ A) + inv(Var{k}));
 %             mu = sigma * (A' * (Q \ next_state) + (Var{k} \ Mean{k}));
 
+            %%% End of linearisation method &&&
+
+            %%% Inverse unscented method &&&
+            
 %             % generate sigma points
-%             sig_pts = zeros(4,9);
-%             sig_wts = zeros(9,1);
-%             sig_wts(1) = -1/3;
-%             for spi = 2:9
-%                 col = mod(spi-2,4)+1;
-%                 if spi<6, sgn=1; else sgn=-1; end
-%                 sig_pts(:,spi) = sgn * Par.UQchol(:,col);
-%                 sig_wts(spi) = 1/6;
-%             end
+%             [ sig_pts, sig_wts, Np ] = UnscentedTransform( zeros(4,1), Par.Q );
 %             
 %             % Propagate points backwards
 %             back_sig_pts = zeros(4,9);
-%             for spi = 1:9
-%                 back_sig_pts(:,spi) = IntrinsicDynamicInverse(next_state, sig_pts(:,spi));
+%             for ii = 1:Np
+%                 back_sig_pts(:,ii) = IntrinsicDynamicInverse(next_state, sig_pts(:,ii));
 %             end
 %             back_mean = back_sig_pts * sig_wts;
 %             back_less_mean = bsxfun(@minus, back_sig_pts, back_mean);
 %             back_var = zeros(4,4);
-%             for spi = 1:9
-%                 back_var = back_var + sig_wts(spi) * back_less_mean(:,spi)*back_less_mean(:,spi)';
+%             for ii = 1:Np
+%                 back_var = back_var + sig_wts(ii) * back_less_mean(:,ii)*back_less_mean(:,ii)';
 %             end
 %             
 %             sigma = inv(inv(back_var) + inv(Var{k}));
 %             mu = sigma * (back_var\back_mean + Var{k}\Mean{k}); %#ok<MINV>
 
+            %%% End of inverse unscented method &&&
+            
+            %%% RTS unscented method &&&
+            
             % Unscented Transform
             [sig_pts_now, sig_wts, Np] = UnscentedTransform([Mean{k}; zeros(4,1)], [Var{k}, zeros(4); zeros(4), Par.Q]);
             sig_pts_now(4,:) = max(sig_pts_now(4,:), Par.MinSpeed);
             
             % Project Forwards
-            for ii = 1:Np
-                sig_pts_next(:,ii) = IntrinsicDynamicEvaluate(sig_pts_now(1:4,ii), sig_pts_now(5:8,ii));
-            end
+            sig_pts_next = IntrinsicDynamicEvaluate(sig_pts_now(1:4,:), sig_pts_now(5:8,:));
             
             % Calculate stats
             pred_mean = sig_pts_next * sig_wts;
@@ -128,6 +125,8 @@ for k = L:-1:1
             
             sigma = Var{k} - (cross_covar/pred_covar)*cross_covar';
             mu = Mean{k} + (cross_covar/pred_covar)*(next_state - pred_mean);
+
+            %%% End of RTS unscented method &&&
             
         elseif (Par.FLAG_DynMod == 0)
             sigma = inv(A' * (Q \ A) + inv(Var{k}));

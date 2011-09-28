@@ -48,7 +48,7 @@ for t = Par.AnalysisLag:Par.T
         SE_MAP(t, j) = sum((true_state(1:2)-MAP_state(1:2)).^2);
         
         % Count correct associations
-        assoc = cellfun(@(x) x.tracks(j).assoc(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{t}.particles);
+        assoc = cellfun(@(x) x.tracks(j).assoc(t-Par.AnalysisLag+1 -x.tracks(j).birth+1), Results{Par.T}.particles);
         true_assoc = TrueTracks{j}.assoc(t-Par.AnalysisLag+1 -TrueTracks{j}.birth+1);
         CorrectAssociations(t,j) = sum(assoc==true_assoc);
         
@@ -58,7 +58,7 @@ for t = Par.AnalysisLag:Par.T
         else
             tracking = true;
         end
-        for tt = t-Par.AnalysisLag+2:t
+        for tt = t-Par.AnalysisLag+1:t
             assoc = cellfun(@(x) x.tracks(j).assoc(tt -x.tracks(j).birth+1), Results{t}.particles);
             true_assoc = TrueTracks{j}.assoc(tt -TrueTracks{j}.birth+1);
             if (true_assoc~=0)&&(sum(assoc==true_assoc)>0)

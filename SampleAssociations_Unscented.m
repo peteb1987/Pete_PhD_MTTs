@@ -51,10 +51,7 @@ for k = 1:Lpd
     if Par.FLAG_DynMod == 0
         XSigPts{k} = Par.A * curr_pts + grand_sig_pts( 4*(k-1)+1:4*k ,:);
     elseif Par.FLAG_DynMod == 1
-        XSigPts{k} = zeros(4,Np);
-        for ii = 1:Np
-            XSigPts{k}(:,ii) = IntrinsicDynamicEvaluate(curr_pts(:,ii), grand_sig_pts( 4*k+1:4*(k+1) ,ii));
-        end
+        XSigPts{k} = IntrinsicDynamicEvaluate(curr_pts, grand_sig_pts( 4*k+1:4*(k+1) ,:));
     end
     curr_pts = XSigPts{k};
 end
@@ -66,10 +63,13 @@ for k = 1:Lpd
         YSigPts{k} = Par.C * XSigPts{k};
     elseif Par.FLAG_ObsMod == 1
         YSigPts{k} = zeros(2,Np);
-        for ii = 1:Np
-            [bng, rng] = cart2pol(XSigPts{k}(1,ii), XSigPts{k}(2,ii));
-            YSigPts{k}(:,ii) = [bng; rng];
+        [bng, rng] = cart2pol(XSigPts{k}(1,:), XSigPts{k}(2,:));
+        % Make sure all the sigma point are the same side of the bearing discontinuity
+        quad = (abs(bng)>(pi/2)).*sign(bng);
+        if any(quad==1)&&any(quad==-1)
+            bng(quad==-1) = bng(quad==-1) + 2*pi;
         end
+        YSigPts{k} = [bng; rng];
     end
 end
 
@@ -101,15 +101,10 @@ for tt = last:-1:t-L+1
         end
     end
     
-    % Get required means
-    p_y_now = YPredMeans{k};
-    if ~isinf(d)
-        p_y_next = YPredMeans{k+d};
-    end
-    
     % Calculate required covariances
     y_var_now = Par.R;
     diff_now = bsxfun(@minus, YSigPts{k}, YPredMeans{k});
+    
     for ii = 1:Np
         y_var_now = y_var_now + sig_wts(ii) * diff_now(:,ii)*diff_now(:,ii)';
     end
@@ -122,14 +117,35 @@ for tt = last:-1:t-L+1
             y_covar_future = y_covar_future + sig_wts(ii) * diff_now(:,ii)*diff_next(:,ii)';
         end
     end
+        
+    % Get required means
+    p_y_now = YPredMeans{k};
+    if ~isinf(d)
+        p_y_next = YPredMeans{k+d};
+    end
     
     % Calculate mean and variance
     if isinf(d)
         m = p_y_now;
         S = y_var_now;
     else
-        m = p_y_now + (y_covar_future / y_var_next)*(y_next - p_y_next);
+        y_diff = (y_next - p_y_next);
+        if Par.FLAG_ObsMod == 1
+            if y_diff(1)>pi
+                y_diff(1) = y_diff(1) - 2*pi;
+            elseif y_diff(1)<-pi
+                y_diff(1) = y_diff(1) + 2*pi;
+            end
+        end
+        m = p_y_now + (y_covar_future / y_var_next)*y_diff;
         S = y_var_now - (y_covar_future / y_var_next)*y_covar_future';
+    end
+    if Par.FLAG_ObsMod == 1
+        if m(1)>pi
+            m(1) = m(1) - 2*pi;
+        elseif m(1)<-pi
+            m(1) = m(1) + 2*pi;
+        end
     end
     
     S = (S+S')/2;
@@ -158,7 +174,7 @@ for tt = last:-1:t-L+1
     % Calculate weights
     ppsl_weights = zeros(N+1, 1);
     for i = validated
-        ppsl_weights(i) = (Par.PDetect) * mvnpdf(Observs(tt).r(i, :), m', S);
+        ppsl_weights(i) = (Par.PDetect) * mvnpdf(innov(:,i)', [0 0], S);
     end
     
     %         %%%

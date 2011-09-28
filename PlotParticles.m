@@ -33,11 +33,11 @@ for j = 1:Part.N
         col = [rand, rand, 0];
         
         % Collate state
-        if Par.FLAG_RB&&((Par.FLAG_AlgType==0)||(Par.FLAG_AlgType==1))
-            state = cell2mat(Part.tracks(j).smooth');
-        else
+%         if Par.FLAG_RB&&((Par.FLAG_AlgType==0)||(Par.FLAG_AlgType==1))
+%             state = cell2mat(Part.tracks(j).smooth');
+%         else
             state = cell2mat(Part.tracks(j).state');
-        end
+%         end
         x = state(1, :);
         y = state(2, :);
         

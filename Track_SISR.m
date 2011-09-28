@@ -7,7 +7,7 @@ global Templates;
 % Initialise arrays for results, intermediates and diagnostics
 Results = cell(Par.T, 1);
 PartSets = cell(Par.T, 1);
-% BestEsts = cell(Par.T, 1);
+BestEsts = cell(Par.T, 1);
 
 if ~Par.FLAG_KnownInitStates
     % No knowledge of target starting positions
@@ -50,9 +50,9 @@ for t = 1:Par.T
     disp(['*** Now processing frame ' num2str(t)]);
     
     if t==1
-        [PartSets{t}] = SISRFrame(t, t, InitPartSet, Observs);
+        [PartSets{t}, BestEsts{t}] = SISRFrame(t, t, InitPartSet, Observs);
     else
-        [PartSets{t}] = SISRFrame(t, min(t,Par.L), PartSets{t-1}, Observs);
+        [PartSets{t}, BestEsts{t}] = SISRFrame(t, min(t,Par.L), PartSets{t-1}, Observs);
     end
     
     Results{t} = PartSets{t};
@@ -77,31 +77,11 @@ for t = 1:Par.T
     end
 end
 
-% % Kalman smooth the states
-% if Par.FLAG_RB
-%     for t = 1:Par.T
-%         for ii = 1:Par.NumPart
-%             for j = 1:Par.NumTgts
-%                 last = min(t, PartSets{t}.particles{ii}.tracks(j).death - 1);
-%                 first = max(1, PartSets{t}.particles{ii}.tracks(j).birth+1);
-%                 num = last - first + 1;
-%                 Obs = ListAssocObservs(last, num, PartSets{t}.particles{ii}.tracks(j), Observs);
-%                 init_state = PartSets{t}.particles{ii}.tracks(j).state{first-1 -PartSets{t}.particles{ii}.tracks(j).birth+1};
-%                 init_var = Par.KFInitVar*eye(4);
-%                 [ Mean, ~ ] = KalmanSmoother( Obs, init_state, init_var );
-%                 PartSets{t}.particles{ii}.tracks(j).state(first -PartSets{t}.particles{ii}.tracks(j).birth+1:last -PartSets{t}.particles{ii}.tracks(j).birth+1) = Mean;
-%             end
-%         end
-%         Results{t}.particles = PartSets{t}.particles;
-%         Results{t}.posteriors = PartSets{t}.posteriors;
-%     end
-% end
-
 end
 
 
 
-function [PartSet] = SISRFrame(t, L, PrevPartSet, Observs)
+function [PartSet, BestEst] = SISRFrame(t, L, PrevPartSet, Observs)
 % Execute a frame of the fixed-lag SISR-PF target tracker
 
 % t - latest time frame
@@ -111,23 +91,31 @@ function [PartSet] = SISRFrame(t, L, PrevPartSet, Observs)
 
 global Par;
 
+% Porbability arrays
+post_arr = zeros(Par.NumPart,1);
+reverse_kernel_arr = zeros(Par.NumPart,1);
+origin_post_arr = zeros(Par.NumPart,1);
+ppsl_arr = zeros(Par.NumPart,1);
+
 % Create arrays to store diagnostics
 ESS_post = zeros(Par.NumTgts,1);
 ESS_pre = zeros(Par.NumTgts,1);
 
+% Initialise particle array and weight array
+PartSet = PrevPartSet;
+weights = repmat({zeros(Par.NumPart,1)}, Par.NumTgts, 1);
 
 % Project tracks forward
 for ii = 1:Par.NumPart
     for j = 1:Par.NumTgts
-        if t == PrevPartSet.particles{ii}.tracks(j).death
-            PrevPartSet.particles{ii}.tracks(j) = ProjectTrack(t, PrevPartSet.particles{ii}.tracks(j));
+        if t == PartSet.particles{ii}.tracks(j).death
+            PartSet.particles{ii}.tracks(j) = ProjectTrack(t, PartSet.particles{ii}.tracks(j));
         end
     end
 end
 
-% Initialise particle array and weight array
-PartSet = PrevPartSet;
-weights = repmat({zeros(Par.NumPart,1)}, Par.NumTgts, 1);
+% Keep a copy of the projected particle set
+ProjPartSet = PartSet;
 
 % Loop through particles
 for ii = 1:Par.NumPart
@@ -140,24 +128,24 @@ for ii = 1:Par.NumPart
     for j = 1:Par.NumTgts
         
         % Calculate reverse kernel probability
-        [reverse_kernel, ~, ~] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, true);
+        [reverse_kernel, ~, ~] = SampleCurrent(j, t-1, L-1, PrevPartSet.particles{ii}, Observs, true);
         
         % Calculate t-1 posterior
-        origin_post = SingTargPosterior(j, t-1, L-1, PartSet.particles{ii}, Observs);
+        origin_post = SingTargPosterior(j, t-1, L-1, PrevPartSet.particles{ii}, Observs);
         
         % Propose new current states
         [ppsl, PartAssocs{j}, PartStates{j}, ~, PartVars{j}] = SampleCurrent(j, t, L, PartSet.particles{ii}, Observs, false);
         
         % Update a dummy set for calculating the posterior (we don't want
         % this target to block future ones - independence assumption)
-        DummySet = PrevPartSet;
+        DummySet = ProjPartSet;
         DummySet.particles{ii}.tracks(j).state(t-L+1 -DummySet.particles{ii}.tracks(j).birth+1 : t -DummySet.particles{ii}.tracks(j).birth+1) = PartStates{j};
         DummySet.particles{ii}.tracks(j).assoc(t-L+1 -DummySet.particles{ii}.tracks(j).birth+1 : t -DummySet.particles{ii}.tracks(j).birth+1) = PartAssocs{j};
         DummySet.particles{ii}.tracks(j).covar(t-L+1 -DummySet.particles{ii}.tracks(j).birth+1 : t -DummySet.particles{ii}.tracks(j).birth+1) = PartVars{j};
         
         % Calculate t posterior
         post = SingTargPosterior(j, t, L, DummySet.particles{ii}, Observs);
-                
+        
         % Calculate weight
         weights{j}(ii) = PartSet.weights{j}(ii) ...
             + (post + reverse_kernel) ...
@@ -169,6 +157,11 @@ for ii = 1:Par.NumPart
         
         % Store posterior
         PartSet.posteriors(ii,j) = post;
+        
+        post_arr(ii) = post;
+        reverse_kernel_arr(ii) = reverse_kernel;
+        origin_post_arr(ii) = origin_post;
+        ppsl_arr(ii) = ppsl;
         
     end
     
@@ -219,10 +212,10 @@ for j = 1:Par.NumTgts
     end
     
     if (ESS_pre(j) < Par.ResamThresh*Par.NumPart)
-        [PartSet] = ConservativeResample(j, PartSet, weights{j});
-%         [PartSet] = SystematicResample(j, PartSet, weights{j});
+%         [PartSet] = ConservativeResample(j, PartSet, weights{j});
+        [PartSet] = SystematicResample(j, PartSet, weights{j});
         ESS_post(j) = CalcESS(PartSet.weights{j});
-        disp(['*** Target Cluster' num2str(j) ': Effective Sample Size = ' num2str(ESS_pre(j)) '. RESAMPLED (Conservative). ESS = ' num2str(ESS_post(j))]);
+        disp(['*** Target Cluster' num2str(j) ': Effective Sample Size = ' num2str(ESS_pre(j)) '. RESAMPLED. ESS = ' num2str(ESS_post(j))]);
     else
         [PartSet] = LowWeightRemoval(j, PartSet, weights{j});
         ESS_post(j) = CalcESS(PartSet.weights{j});
@@ -231,6 +224,12 @@ for j = 1:Par.NumTgts
     
 end
 
+% Pick the best particle
+total_post = sum(PartSet.posteriors, 2);
+best_ind = find(total_post==max(total_post), 1);
+BestEst = PartSet.particles{best_ind};
+BestEst.origin(:) = best_ind;
+BestEst.origin_time(:) = t;
 
 end
 

@@ -40,10 +40,7 @@ for k = 1:L
     if Par.FLAG_DynMod == 0
         sig_pts_next = Par.A * sig_pts_now(1:4,:) + sig_pts_now(5:8,:);
     elseif Par.FLAG_DynMod == 1
-        sig_pts_next = zeros(4,Np);
-        for ii = 1:Np
-            sig_pts_next(:,ii) = IntrinsicDynamicEvaluate(sig_pts_now(1:4,ii), sig_pts_now(5:8,ii));
-        end
+        sig_pts_next = IntrinsicDynamicEvaluate(sig_pts_now(1:4,:), sig_pts_now(5:8,:));
     end
     
     % Prediction mean and variance
@@ -77,11 +74,14 @@ for k = 1:L
         elseif Par.FLAG_ObsMod == 1
             
             % Send points though the observation model
-            sig_pts_obs = zeros(2,Np);
-            for ii = 1:Np
-                [bng, rng] = cart2pol(sig_pts_next(1,ii), sig_pts_next(2,ii));
-                sig_pts_obs(:,ii) = [bng; rng];
+            [bng, rng] = cart2pol(sig_pts_next(1,:), sig_pts_next(2,:));
+            
+            % Make sure all the sigma point are the same side of the bearing discontinuity
+            quad = (abs(bng)>(pi/2)).*sign(bng);
+            if any(quad==1)&&any(quad==-1)
+                bng(quad==-1) = bng(quad==-1) + 2*pi;
             end
+            sig_pts_obs = [bng; rng];
             
             % Remaining stats
             obs_mean = sig_pts_obs * sig_wts;
@@ -95,7 +95,13 @@ for k = 1:L
             
             % Update
             gain = cross_covar / obs_var;
-            Mean{k} = PredMean{k} + gain * (obs{k} - obs_mean);
+            y_diff = (obs{k} - obs_mean);
+            if y_diff(1)>pi
+                y_diff(1) = y_diff(1) - 2*pi;
+            elseif y_diff(1)<-pi
+                y_diff(1) = y_diff(1) + 2*pi;
+            end
+            Mean{k} = PredMean{k} + gain * y_diff;
             Var{k} = PredVar{k} - gain * obs_var * gain';
             
         end

@@ -99,9 +99,7 @@ for j = 1:Par.NumTgts
     if Par.FLAG_DynMod == 0
         forward_sig_pts = Par.A * sig_pts(1:4,:) + sig_pts(5:8,:);
     elseif Par.FLAG_DynMod == 1
-        for spi = 1:17
-            forward_sig_pts(:,spi) = IntrinsicDynamicEvaluate(sig_pts(1:4,spi), sig_pts(5:8,spi));
-        end
+        forward_sig_pts = IntrinsicDynamicEvaluate(sig_pts(1:4,:), sig_pts(5:8,:));
     end
     
     % Calculate predictive state mean and variance
@@ -117,6 +115,11 @@ for j = 1:Par.NumTgts
         obs_sig_pts = Par.C * forward_sig_pts;
     elseif Par.FLAG_ObsMod == 1
         [bng, rng] = cart2pol(forward_sig_pts(1, :), forward_sig_pts(2, :));
+        % Make sure all the sigma point are the same side of the bearing discontinuity
+        quad = (abs(bng)>(pi/2)).*sign(bng);
+        if any(quad==1)&&any(quad==-1)
+            bng(quad==-1) = bng(quad==-1) + 2*pi;
+        end
         obs_sig_pts = [bng; rng];
     end
     

@@ -37,7 +37,9 @@ for tt = start_time:end_time
     state = Set.tracks(j).state{tt -Set.tracks(j).birth+1};
     
     % Calculate likelihood
-    if any(abs(state(3:4))>Par.Vlimit)||any(abs(state(1:2))>2*Par.Xmax)
+    if (any(abs(state(3:4))>Par.Vlimit)&&(Par.FLAG_DynMod==0))||...
+       ((abs(state(4))>Par.Vlimit)&&(Par.FLAG_DynMod==1))||...
+       any(abs(state(1:2))>2*Par.Xmax)
         like(k) = -inf;
     else
         ass = Set.tracks(j).assoc(tt -Set.tracks(j).birth+1);

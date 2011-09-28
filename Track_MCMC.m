@@ -72,26 +72,6 @@ for t = 1:Par.T
     
 end
 
-% % Kalman smooth the states
-% if Par.FLAG_RB
-%     for t = 1:Par.T
-%         for ii = 1:Par.NumIt
-%             for j = 1:Par.NumTgts
-%                 last = min(t, Chains{t}.particles{ii}.tracks(j).death - 1);
-%                 first = max(1, Chains{t}.particles{ii}.tracks(j).birth+1);
-%                 num = last - first + 1;
-%                 Obs = ListAssocObservs(last, num, Chains{t}.particles{ii}.tracks(j), Observs);
-%                 init_state = Chains{t}.particles{ii}.tracks(j).state{first-1 -Chains{t}.particles{ii}.tracks(j).birth+1};
-%                 init_var = Par.KFInitVar*eye(4);
-%                 [ Mean, Var ] = KalmanSmoother( Obs, init_state, init_var );
-%                 Chains{t}.particles{ii}.tracks(j).state(first -Chains{t}.particles{ii}.tracks(j).birth+1:last -Chains{t}.particles{ii}.tracks(j).birth+1) = Mean;
-%             end
-%         end
-%         Results{t}.particles = Chains{t}.particles;
-%         Results{t}.posteriors = Chains{t}.posteriors;
-%     end
-% end
-
 end
 
 
@@ -186,8 +166,8 @@ for ii = 2:Par.NumIt
     end
     
     % Choose target
-    %     j = unidrnd(New.N);
-    j = mod(ii, New.N)+1;
+%     j = unidrnd(New.N);
+    j = mod(ii-2, New.N)+1;
     
     % Randomly select move type
     if t > Par.L
@@ -206,7 +186,7 @@ for ii = 2:Par.NumIt
             
             % Choose proposal start-point
             d = unidrnd(L);
-            %             d = L;
+%             d = L;
             
             % Sample proposal
             [new_ppsl, assoc, state, mean, var] = SampleCurrent(j, t, d, New, Observs, false);
@@ -218,7 +198,7 @@ for ii = 2:Par.NumIt
             
         case 2 % Single target, history and window - assumes independence for frames <= t-L
             
-            %             sn = s;
+%             sn = s;
             sn = unidrnd(s);
             k = t-sn;
             
@@ -233,7 +213,7 @@ for ii = 2:Par.NumIt
             % Extend track up to time t with blanks
             New.tracks(j).state = [New.tracks(j).state; repmat({zeros(4,1)}, sn, 1)];
             New.tracks(j).smooth = [New.tracks(j).smooth; repmat({zeros(4,1)}, sn, 1)];
-            New.tracks(j).covar = [New.tracks(j).covar; repmat({zeros(4,4)}, sn, 1)];
+            New.tracks(j).covar = [New.tracks(j).covar; repmat({zeros(4)}, sn, 1)];
             New.tracks(j).assoc = [New.tracks(j).assoc; zeros(sn, 1)];
             New.tracks(j).death = t+1;
             New.tracks(j).num = New.tracks(j).death - New.tracks(j).birth;
@@ -248,7 +228,7 @@ for ii = 2:Par.NumIt
             
         case 3 % Single target, history and bridging region - assumes independence for frames <= t-L
             
-            %             sn = s;
+%             sn = s;
             sn = unidrnd(s);
             k = t-sn;
             
@@ -283,8 +263,6 @@ for ii = 2:Par.NumIt
         new_origin_post = SingTargPosterior(j, t-sn, L-sn, NewOrigin, Observs);
         if (sn < L)
             new_reverse_kernel = SampleCurrent(j, t-sn, L-sn, NewOrigin, Observs, true);
-            %             new_reverse_kernel = NewOrigin.ReverseKernel(j, t-sn, L-sn, New, Observs);
-            %             new_reverse_kernel = 0;
         else
             new_reverse_kernel = 0;
         end

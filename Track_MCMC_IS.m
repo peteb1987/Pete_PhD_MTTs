@@ -155,14 +155,7 @@ for ii = 2:Par.NumIt
         % Project tracks forward
         for j = 1:Old.N
             if t == Old.tracks(j).death
-                state = Par.A * Old.tracks(j).state{t-1-Old.tracks(j).birth+1};
-                covar = Par.A * Old.tracks(j).covar{t-1-Old.tracks(j).birth+1} * Par.A + Par.Q;
-                Old.tracks(j).death = Old.tracks(j).death + 1;
-                Old.tracks(j).num = Old.tracks(j).num + 1;
-                Old.tracks(j).state = [Old.tracks(j).state; {state}];
-                Old.tracks(j).smooth = [Old.tracks(j).smooth; {state}];
-                Old.tracks(j).covar = [Old.tracks(j).covar; {covar}];
-                Old.tracks(j).assoc = [Old.tracks(j).assoc; 0];
+                Old.tracks(j) = ProjectTrack(t, Old.tracks(j));
             end
         end
         

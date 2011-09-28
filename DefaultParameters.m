@@ -73,7 +73,7 @@ elseif Par.FLAG_DynMod == 1
                  0 0 0 Par.x2NoiseVar];                                    % Noise variance matrix of accelerations. Must be weighted by noise jacobian before use as Q.
 	Par.Q = Par.Q_pre;
     Par.Qchol = chol(Par.Q_pre)';
-    Par.UQchol = chol(3*Par.Q_pre);
+    Par.UQchol = chol(3*Par.Q_pre)';
     Par.MinSpeed = 0.1;
 end
 Par.ExpBirth = 0.1;                                                        % Expected number of new targets in a frame (poisson deistributed)
@@ -118,11 +118,11 @@ Par.ResampleLowWeightThresh = 30;       % Orders of magnitude below max for part
 
 %%% For MCMC shemes %%%
 Par.NumIt = 500;                        % Number of iterations
-Par.S = Par.L;                          % Max distance previously from which particles are sampled
+Par.S = 1;                              % Max distance previously from which particles are sampled
 Par.BridgeLength = 1;                   % Length of bridge for bridging-history proposals.
 Par.Restart = 10000;                    % Restart after this many iterations
 Par.BurnIn = floor(0.1*Par.NumIt);      % Length of burn-in
 
 %%% For MCMC-IS %%%
-Par.HistoryAcceptScaling = 0.5;
+Par.HistoryAcceptScaling = 1;
 Par.CurrentAcceptScaling = 0.5;
